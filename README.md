@@ -121,7 +121,6 @@ cp /home/CLIPipe_user/clipipe/demo/general ${workspace}
 ```
 
 The demo data folder has the following structure:
-
 ```
 ./
 ├── config
@@ -135,16 +134,38 @@ The demo data folder has the following structure:
 ```
 
 > **Note:**
->
+> - `config/user_config.yaml`: configuration file with user defined parameters for each step. 
 > - `config/default_config.yaml`: configuration file with additional detailed parameters for each step. The default file is not supposed to be changed unless you are very clear about what you are doing.
 > - `config/fastq/`: folder of raw CLIP-seq fastq file.
 > - `data/sample_ids.txt`: table of sample name information.
 > - `output/example/`: output folder.
 
-
 ### Pre-processing
 
+CLIPipe provides pre process step for raw CLIP-seq data. You needs to set up the `config/user_config.yaml` file correctly. The other parameters for pre process step can be found in `config/default_config.yaml`.
+
+```bash
+clipipe -u ./config/user_config.yaml pre_process
+```
+
+> **Note:**
+> - The output folder `output/fastqc_raw/` contains quality control results of raw CLIP-seq data.
+> - The output folder `output/multiqc_raw/` contains summary of all raw sequencing data quality control results.
+> - The output folders `output/pre_process/` contain the pre process results of raw CLIP-seq data.
+
 ### Alignment
+
+CLIPipe provides bowtie, bwa and novoalign for mapping CLIP-seq data. You need to set up the alignment tool in the `config/user_config.yaml` file correctly. It is **recommended** to specify the number of threads in `config/user_config.yaml` file by adding `threads_mapping: N`, or you can simply add `-j N` parameter in the exseek command. The other detial parameters for alignment can be found in `config/default_config.yaml`.
+
+```bash
+clipipe -u ./config/user_config.yaml mapping
+```
+
+> **Note:**
+>
+> - The output folder `output/fastqc_raw/` contains quality control results of raw CLIP-seq data.
+> - The output folder `output/multiqc_raw/` contains summary of all raw sequencing data quality control results.
+> - The output folders `output/pre_process/` contain the pre process results of raw CLIP-seq data.
 
 ### Peak calling
 
@@ -156,4 +177,5 @@ The demo data folder has the following structure:
 Copyright (C) 2021 Tsinghua University, Beijing, China
 
 This program is licensed with commercial restriction use license. Please see the [LICENSE](https://github.com/ShangZhang/clipipe/blob/main/LICENSE) file for details.
+
 

@@ -5,8 +5,8 @@ summary_dir = config.get('summary_dir')
 
 def get_all_inputs(wildcards):
     available_inputs = dict(
-        bam_index_file=expand('{output_dir}/bowtie_map/{sample_id}.bam.bai',output_dir=output_dir, sample_id=sample_ids),
-        bed_file=expand('{output_dir}/bowtie_map/{sample_id}.bed',output_dir=output_dir, sample_id=sample_ids),
+        bam_index_file=expand('{output_dir}/mapping_bowtie/{sample_id}.bam.bai',output_dir=output_dir, sample_id=sample_ids),
+        bed_file=expand('{output_dir}/mapping_bowtie/{sample_id}.bed',output_dir=output_dir, sample_id=sample_ids),
     )
     enabled_inputs = list(available_inputs.keys())
     inputs = []
@@ -21,19 +21,17 @@ rule all:
 
 ###------------------------The output section---------------------------###
 
-rule bowtie_mapping:
+rule mapping_bowtie:
     input:
         fasta='{output_dir}/pre_process/{sample_id}.clipped.filtered.collapsed.trimmed.fa'
     output:
-        sam='{output_dir}/bowtie_map/{sample_id}.sam'
+        sam='{output_dir}/mapping_bowtie/{sample_id}.sam'
     params:
         bowtie1_index=config.get('reference_dir') + '/hg19/bowtie_index_hg19/Human_hg19'
     threads: 
         config.get('threads_mapping')
-    # conda:
-    #     "./envs/bowtie_mapping.yaml"
     log:
-        '{output_dir}/log/bowtie_mapping/{sample_id}.log'
+        '{output_dir}/log/mapping_bowtie/{sample_id}.log'
     shell:
         '''bowtie \
             -f \
@@ -50,13 +48,11 @@ rule bowtie_mapping:
 
 rule sam2bam:
     input:
-        sam_file='{output_dir}/bowtie_map/{sample_id}.sam'
+        sam_file='{output_dir}/mapping_bowtie/{sample_id}.sam'
     output:
-        bam_file='{output_dir}/bowtie_map/{sample_id}.bam'
+        bam_file='{output_dir}/mapping_bowtie/{sample_id}.bam'
     threads:
         config.get('threads_compress')
-    # conda:
-    #     "./envs/bowtie_mapping.yaml"
     log:
         '{output_dir}/log/sam2bam/{sample_id}.log'
     shell:
@@ -66,13 +62,11 @@ rule sam2bam:
 
 rule bam_index:
     input:
-        bam_file='{output_dir}/bowtie_map/{sample_id}.bam'
+        bam_file='{output_dir}/mapping_bowtie/{sample_id}.bam'
     output:
-        bam_index_file='{output_dir}/bowtie_map/{sample_id}.bam.bai'
+        bam_index_file='{output_dir}/mapping_bowtie/{sample_id}.bam.bai'
     threads:
         config.get('threads_mapping')
-    # conda:
-    #     "./envs/bowtie_mapping.yaml"
     log:
         '{output_dir}/log/bam_index/{sample_id}.log'
     shell:
@@ -81,13 +75,11 @@ rule bam_index:
 
 rule bam2bed:
     input:
-        bam_file='{output_dir}/bowtie_map/{sample_id}.bam'
+        bam_file='{output_dir}/mapping_bowtie/{sample_id}.bam'
     output:
-        bed_file='{output_dir}/bowtie_map/{sample_id}.bed'
+        bed_file='{output_dir}/mapping_bowtie/{sample_id}.bed'
     threads:
         config.get('threads_compress')
-    # conda:
-    #     "./envs/bowtie_mapping.yaml"
     log:
         '{output_dir}/log/bam2bed/{sample_id}.log'
     shell:
