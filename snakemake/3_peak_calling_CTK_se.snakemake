@@ -8,7 +8,7 @@ root_dir = config.get('root_dir')
 
 def get_all_inputs(wildcards):
     available_inputs = dict(
-        cims_uniq_robust_bed_file=expand('{output_dir}/CTK/{sample_id}.CIMS.robust.bed',output_dir=output_dir, sample_id=sample_ids)
+        cims_uniq_robust_bed_file=expand('{output_dir}/peak_calling_CTK/{sample_id}.CIMS.robust.bed',output_dir=output_dir, sample_id=sample_ids)
     )
     enabled_inputs = list(available_inputs.keys())
     inputs = []
@@ -27,8 +27,8 @@ rule convert_novoalign_file_to_tag_bed:
     input:
         novoalign_mapping_file='{output_dir}/novoalign_map/{sample_id}.novoalign'
     output:
-        ctk_bed_file='{output_dir}/CTK/{sample_id}.tag.bed',
-        ctk_mutation_bed_file='{output_dir}/CTK/{sample_id}.mutation.bed'
+        ctk_bed_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.bed',
+        ctk_mutation_bed_file='{output_dir}/peak_calling_CTK/{sample_id}.mutation.bed'
     threads: 
         config.get('threads_compress')
     log:
@@ -45,9 +45,9 @@ rule convert_novoalign_file_to_tag_bed:
 
 rule collapse_duplicate:
     input:
-        ctk_bed_file='{output_dir}/CTK/{sample_id}.tag.bed'
+        ctk_bed_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.bed'
     output:
-        ctk_uniq_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.bed'
+        ctk_uniq_bed_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.uniq.bed'
     threads: 
         config.get('threads_compress')
     log:
@@ -64,10 +64,10 @@ rule collapse_duplicate:
 
 rule join_mutation_with_tag_bed:
     input:
-        ctk_mutation_bed_file='{output_dir}/CTK/{sample_id}.mutation.bed',
-        ctk_uniq_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.bed'
+        ctk_mutation_bed_file='{output_dir}/peak_calling_CTK/{sample_id}.mutation.bed',
+        ctk_uniq_bed_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.uniq.bed'
     output:
-        ctk_mutation_uniq_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.mutation.bed'
+        ctk_mutation_uniq_bed_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.uniq.mutation.bed'
     threads:
         config.get('threads_compress')
     # conda:
@@ -86,11 +86,11 @@ rule join_mutation_with_tag_bed:
 
 rule split_bed_file_according_to_three_mutation_type:
     input:
-        ctk_mutation_uniq_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.mutation.bed'
+        ctk_mutation_uniq_bed_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.uniq.mutation.bed'
     output:
-        ctk_del_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.del.bed',
-        ctk_sub_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.sub.bed',
-        ctk_ins_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.ins.bed'
+        ctk_del_bed_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.uniq.del.bed',
+        ctk_sub_bed_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.uniq.sub.bed',
+        ctk_ins_bed_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.uniq.ins.bed'
     threads: 
         config.get('threads_compress')
     log:
@@ -106,12 +106,12 @@ rule split_bed_file_according_to_three_mutation_type:
 
 rule CIMS_calculation_deletion_type:
     input:
-        ctk_uniq_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.bed',
-        ctk_del_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.del.bed'
+        ctk_uniq_bed_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.uniq.bed',
+        ctk_del_bed_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.uniq.del.bed'
     output:
-        tmp_dir='{output_dir}/CTK/{sample_id}_cache_del/',
-        cims_uniq_del_file='{output_dir}/CTK/{sample_id}.tag.uniq.del.CIMS.txt',
-        cims_uniq_del_robust_file='{output_dir}/CTK/{sample_id}.tag.uniq.del.CIMS.robust.txt'
+        tmp_dir='{output_dir}/peak_calling_CTK/{sample_id}_cache_del/',
+        cims_uniq_del_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.uniq.del.CIMS.txt',
+        cims_uniq_del_robust_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.uniq.del.CIMS.robust.txt'
     threads: 
         config.get('threads_compress')
     log:
@@ -134,12 +134,12 @@ rule CIMS_calculation_deletion_type:
 
 rule CIMS_calculation_substitution_type:
     input:
-        ctk_uniq_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.bed',
-        ctk_sub_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.sub.bed'
+        ctk_uniq_bed_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.uniq.bed',
+        ctk_sub_bed_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.uniq.sub.bed'
     output:
-        tmp_dir='{output_dir}/CTK/{sample_id}_cache_sub/',
-        cims_uniq_sub_file='{output_dir}/CTK/{sample_id}.tag.uniq.sub.CIMS.txt',
-        cims_uniq_sub_robust_file='{output_dir}/CTK/{sample_id}.tag.uniq.sub.CIMS.robust.txt'
+        tmp_dir='{output_dir}/peak_calling_CTK/{sample_id}_cache_sub/',
+        cims_uniq_sub_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.uniq.sub.CIMS.txt',
+        cims_uniq_sub_robust_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.uniq.sub.CIMS.robust.txt'
     threads: 
         config.get('threads_compress')
     log:
@@ -162,12 +162,12 @@ rule CIMS_calculation_substitution_type:
 
 rule CIMS_calculation_insertion_type:
     input:
-        ctk_uniq_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.bed',
-        ctk_ins_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.ins.bed',
+        ctk_uniq_bed_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.uniq.bed',
+        ctk_ins_bed_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.uniq.ins.bed',
     output:
-        tmp_dir='{output_dir}/CTK/{sample_id}_cache_ins/',
-        cims_uniq_ins_file='{output_dir}/CTK/{sample_id}.tag.uniq.ins.CIMS.txt',
-        cims_uniq_ins_robust_file='{output_dir}/CTK/{sample_id}.tag.uniq.ins.CIMS.robust.txt'
+        tmp_dir='{output_dir}/peak_calling_CTK/{sample_id}_cache_ins/',
+        cims_uniq_ins_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.uniq.ins.CIMS.txt',
+        cims_uniq_ins_robust_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.uniq.ins.CIMS.robust.txt'
     threads: 
         config.get('threads_compress')
     log:
@@ -190,11 +190,11 @@ rule CIMS_calculation_insertion_type:
 
 rule merge_CIMS_peaks_from_three_types_of_mutation:
     input:
-        cims_uniq_del_robust_file='{output_dir}/CTK/{sample_id}.tag.uniq.del.CIMS.robust.txt',
-        cims_uniq_sub_robust_file='{output_dir}/CTK/{sample_id}.tag.uniq.sub.CIMS.robust.txt',
-        cims_uniq_ins_robust_file='{output_dir}/CTK/{sample_id}.tag.uniq.ins.CIMS.robust.txt'
+        cims_uniq_del_robust_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.uniq.del.CIMS.robust.txt',
+        cims_uniq_sub_robust_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.uniq.sub.CIMS.robust.txt',
+        cims_uniq_ins_robust_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.uniq.ins.CIMS.robust.txt'
     output:
-        cims_uniq_robust_bed_file='{output_dir}/CTK/{sample_id}.CIMS.robust.bed'
+        cims_uniq_robust_bed_file='{output_dir}/peak_calling_CTK/{sample_id}.CIMS.robust.bed'
     threads: 
         config.get('threads_compress')
     log:

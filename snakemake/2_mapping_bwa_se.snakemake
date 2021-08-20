@@ -4,7 +4,7 @@ output_dir = config.get("output_dir")
 
 def get_all_inputs(wildcards):
     available_inputs = dict(
-        novoalign_mapping_file=expand('{output_dir}/bwa_mapping/{sample_id}.sam.gz',output_dir=output_dir, sample_id=sample_ids),
+        novoalign_mapping_file=expand('{output_dir}/mapping_bwa/{sample_id}.sam.gz',output_dir=output_dir, sample_id=sample_ids),
     )
     enabled_inputs = list(available_inputs.keys())
     inputs = []
@@ -23,13 +23,13 @@ rule bwa_aln:
     input:
         fastq='{output_dir}/pre_process/{sample_id}.clipped.filtered.collapsed.trimmed.fa'
     output:
-        sai_file='{output_dir}/bwa_mapping/{sample_id}.sai'
+        sai_file='{output_dir}/mapping_bwa/{sample_id}.sai'
     params:
         reference_fasta=config.get('reference_dir') + '/hg19/bwa_index_hg19/hg19'
     threads: 
         config.get('threads_mapping')
     log:
-        '{output_dir}/log/bwa_aln/{sample_id}.log'
+        '{output_dir}/log/mapping_bwa/bwa_aln/{sample_id}.log'
     shell:
         '''bwa aln \
             -t {threads}\
@@ -40,17 +40,17 @@ rule bwa_aln:
 
 rule bwa_samse:
     input:
-        sai_file='{output_dir}/bwa_mapping/{sample_id}.sai',
+        sai_file='{output_dir}/mapping_bwa/{sample_id}.sai',
         fastq='{output_dir}/pre_process/{sample_id}.clipped.filtered.collapsed.trimmed.fa'
     output:
-        sam_file='{output_dir}/bwa_mapping/{sample_id}.sam.gz'
+        sam_file='{output_dir}/mapping_bwa/{sample_id}.sam.gz'
     params:
         reference_fasta=config.get('reference_dir') + '/hg19/bwa_index_hg19/hg19'
         
     threads:
         config.get('threads_compress')
     log:
-        '{output_dir}/log/bwa_samse/{sample_id}.log'
+        '{output_dir}/log/mapping_bwa/bwa_samse/{sample_id}.log'
     shell:
         '''bwa samse {params.reference_fasta} {input.sai_file} {input.fastq} | gzip -c > {output.sam_file}
         '''
