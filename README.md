@@ -3,9 +3,9 @@
 
 CLIPipe(CLIP-seq Pipeline) is an integrated pipeline for analyzing CLIP sequencing data.
 
+![Pipeline of Tutorial](tutorial/CLIPipe_pipeline.png)
 
 The CLIPipe workflow consists of:
-
 
 - Pre-processing function:
   - Quality control of the raw CLIP-seq reads.
