@@ -1,0 +1,18 @@
+channels:
+  - bioconda
+  - conda-forge
+  - r
+  - eugene_t
+
+dependencies:
+  - r-argparse
+  - r-clustersim
+  - bioconductor-scater
+  - bioconductor-scran
+  - bioconductor-singlecellexperiment
+  - r-kbet
+  - bioconductor-sva
+  - bioconductor-edger
+  - r-ggpubr
+  - bioconductor-ruvseq
+  - r-devtools

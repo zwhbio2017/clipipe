@@ -1,0 +1,66 @@
+## 和别的peak calling方法不同，该方法直接从clean fastq file开始
+
+# 测试成功
+include: './0_common.snakemake'
+
+# root_dir = config.get('root_dir')
+output_dir = config.get("output_dir")
+summary_dir = config.get('summary_dir')
+
+def get_all_inputs(wildcards):
+    available_inputs = dict(
+        parclip_suit_result=expand('{output_dir}/peak_calling_parclip_suite/parclip_analysis/{sample_id}',output_dir=output_dir, sample_id=sample_ids)
+    )
+    enabled_inputs = list(available_inputs.keys())
+    inputs = []
+    for key, l in available_inputs.items():
+        if key in enabled_inputs:
+            inputs += l
+    return inputs
+
+rule all:
+    input:
+        get_all_inputs
+
+###------------------------The output section---------------------------###
+
+
+rule pre_process_fasta_file:
+    input:
+        clean_fastq='{output_dir}/pre_process/{sample_id}.clipped.filtered.fastq'
+    output:
+        suitable_fasta='{output_dir}/peak_calling_parclip_suite/prepare_fasta/{sample_id}.fau'
+    params:
+        parclip_suit_cmd_dir=config.get('root_dir') + '/bin/parclip_suite/',
+        parclip_suit_cmd=config.get('root_dir') + '/bin/parclip_suite/prepare_fasta.pl',
+        file_name='{sample_id}',
+        prepare_fasta_dir='{output_dir}/peak_calling_parclip_suite/prepare_fasta'
+    threads: 
+        config.get('threads_compress')
+    log:
+        '{output_dir}/log/peak_calling_parclip_suite/prepare_fasta/{sample_id}.log'
+    shell:
+        '''cd {params.parclip_suit_cmd_dir}; {params.parclip_suit_cmd} \
+            {input.clean_fastq} {params.file_name} {params.prepare_fasta_dir}
+        '''
+
+
+rule parclip_analysis:
+    input:
+        suitable_fasta='{output_dir}/peak_calling_parclip_suite/prepare_fasta/{sample_id}.fau'
+    output:
+        parclip_suit_result='{output_dir}/peak_calling_parclip_suite/parclip_analysis/{sample_id}'
+    params:
+        parclip_suit_cmd_dir=config.get('root_dir') + '/bin/parclip_suite/',
+        parclip_suit_cmd=config.get('root_dir') + '/bin/parclip_suite/analyze_parclip.pl',
+        file_name='{sample_id}',
+        reference_file=config.get('reference_dir2') + '/reference.conf',
+        parclip_analysis_dir='{output_dir}/peak_calling_parclip_suite/parclip_analysis'
+    threads: 
+        config.get('threads_compress')
+    log:
+        '{output_dir}/log/peak_calling_parclip_suite/prepare_fasta/{sample_id}.log'
+    shell:
+        '''cd {params.parclip_suit_cmd_dir}; {params.parclip_suit_cmd} \
+            {input.suitable_fasta} {params.file_name} 10 100 {params.reference_file} {params.parclip_analysis_dir}
+        '''

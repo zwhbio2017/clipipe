@@ -1,0 +1,19 @@
+channels:
+  - bioconda
+  - conda-forge
+  - r
+
+dependencies:
+  #  - pigz=2.3.4
+  #  - star=2.5.3a
+  #  - samtools=1.9
+  #  - picard=2.21.1
+  #  - python=3.7
+  #  - r-ggplot2
+  #  - libjpeg-turbo=2.0.3   ## used for Rscript to generate STAR report
+  - pigz
+  - samtools=1.6
+  - picard
+  - python
+  - r-ggplot2
+  - libjpeg-turbo=2.0.3 ## used for Rscript to generate STAR report

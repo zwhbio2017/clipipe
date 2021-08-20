@@ -1,0 +1,158 @@
+#! /home/CLIPipe_user/bin/miniconda3/envs/clipipe/bin/python
+# -*-coding:UTF-8-*-
+
+# vim: syntax=python tabstop=4 expandtab
+# coding: utf-8
+
+# ---------------------------
+# @author: Shang Zhang
+# @email: shang_zhang@foxmail.com
+# @date: April, 13rd, 2021
+# ---------------------------
+
+import _locale
+_locale._getdefaultlocale = (lambda *args: ['zh_CN', 'utf8'])
+
+steps = (
+    'pre_process',
+    'mapping',
+    'peak_calling',
+)
+
+if __name__ == '__main__':
+
+    import logging
+    import argparse
+    import sys
+    import os
+    import yaml
+    import shutil
+
+    # 设置编码问题
+    # reload(sys)
+    # sys.setdefaultencoding('utf-8')
+
+    # set logging
+    logging.basicConfig(
+        level=logging.ERROR, format='[%(asctime)s] [%(levelname)s] %(name)s: %(message)s')
+    logger = logging.getLogger('CLIPipe')
+
+    # set root dir
+    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    logger.info('CLIPipe\'s root directory: {}'.format(root_dir))
+
+    ##---------------------------------------------------------------------------------##
+
+    # set args
+    parser = argparse.ArgumentParser(
+        
+        description="""
+
+CLIPipe: A comprehensive quality control and analysis pipeline for CLIP highthroughput sequencing data
+=======================================================================================================
+CLIPipe is a Python module and associated command-line interface (CLI), which provides all the
+commands needed to process protein-RNA CLIP interaction data and to identify and quantify
+sites of protein-RNA interactions on RNA.
+
+CLIPipe's main input are FASTQ files with iCLIP sequencing data, its main output are BED files
+with identified and quantified cross-linked sites.
+
+A number of analyses are included in CLIPipe that provide insights into the properties of
+protein-RNA interaction.
+
+""",
+        epilog="""
+=======================================================================================================
+For additional help or support, please visit https://github.com/ShangZhang/clipipe
+""",
+        formatter_class=argparse.RawTextHelpFormatter)
+
+    parser.add_argument('step', type=str, choices=steps)
+    parser.add_argument('--user_config_file', '-u', type=str, required=True,
+                        help='the user config file')
+    # type: class 'argparse.Namespace' 将parser中设置的所有“add_argument”返回给args子类实例；parser中增加的属性内容都会在args实例中，使用即可。
+    args = parser.parse_args()
+
+    # set config
+    # user config
+    user_config_file = args.user_config_file
+    if not os.path.isfile(user_config_file):
+        raise ValueError(
+            'cannot find configuration file: {} '.format(user_config_file))
+    else:
+        logger.info('read user config file: ' + user_config_file)
+        with open(user_config_file, 'r') as f:
+            user_config = yaml.load(f, Loader=yaml.FullLoader)
+
+    # default config
+    default_config_file = user_config.get('default_config_file')
+    if not os.path.isfile(default_config_file):
+        raise ValueError(
+            'cannot find default configuration file: {}'.format(default_config_file))
+    else:
+        logger.info('read default config file: {}'.format(default_config_file))
+        with open(default_config_file, 'r') as f:
+            config = yaml.load(f, Loader=yaml.FullLoader)
+
+    # combine default_config and user_config
+    config.update(user_config)    # dictionary
+
+    # set snakemake using setp(in args) and config
+    # set snakemake_path
+    snakemake_path = shutil.which('snakemake')
+    if snakemake_path is None:
+        raise ValueError('cannot find snakemake command')
+
+    # set snakemake_args (choose steps)
+    if args.step == 'pre_process':
+        if config['paired_end']:
+            snakefile = os.path.join(root_dir, 'snakemake', '1_pre_process_pe.snakemake')
+        else:
+            snakefile = os.path.join(root_dir, 'snakemake', '1_pre_process_se.snakemake')
+
+    elif args.step == 'mapping':
+        if config['paired_end'] and config['aligner'] == 'bowtie':
+            snakefile = os.path.join(root_dir, 'snakemake', '2_mapping_bowtie_pe.snakemake')
+        elif not config['paired_end'] and config['aligner'] == 'bowtie':
+            snakefile = os.path.join(root_dir, 'snakemake', '2_mapping_bowtie_se.snakemake')
+        elif config['paired_end'] and config['aligner'] == 'novoalign':
+            snakefile = os.path.join(root_dir, 'snakemake', '2_mapping_novoalign_pe.snakemake')
+        elif not config['paired_end'] and config['aligner'] == 'novoalign':
+            snakefile = os.path.join(root_dir, 'snakemake', '2_mapping_novoalign_se.snakemake')
+        elif not config['paired_end'] and config['aligner'] == 'bwa':
+            snakefile = os.path.join(root_dir, 'snakemake', '2_mapping_bwa_se.snakemake')
+
+    elif args.step == 'peak_calling':
+        if config['paired_end'] and config['peak_caller'] == 'Piranha':
+            snakefile = os.path.join(root_dir, 'snakemake', '3_peak_calling_piranha_pe.snakemake')
+        elif not config['paired_end'] and config['peak_caller'] == 'Piranha':
+            snakefile = os.path.join(root_dir, 'snakemake', '3_peak_calling_piranha_se.snakemake')
+        elif config['paired_end'] and config['peak_caller'] == 'CLIPper':
+            snakefile = os.path.join(root_dir, 'snakemake', '3_peak_calling_clipper_pe.snakemake')
+        elif not config['paired_end'] and config['peak_caller'] == 'CLIPper':
+            snakefile = os.path.join(root_dir, 'snakemake', '3_peak_calling_clipper_se.snakemake')
+        elif config['paired_end'] and config['peak_caller'] == 'PureCLIP':
+            snakefile = os.path.join(root_dir, 'snakemake', '3_peak_calling_pureclip_pe.snakemake')
+        elif not config['paired_end'] and config['peak_caller'] == 'PureCLIP':
+            snakefile = os.path.join(root_dir, 'snakemake', '3_peak_calling_pureclip_se.snakemake')
+        elif config['paired_end'] and config['peak_caller'] == 'CTK':
+            snakefile = os.path.join(root_dir, 'snakemake', '3_peak_calling_CTK_pe.snakemake')
+        elif not config['paired_end'] and config['peak_caller'] == 'CTK':
+            snakefile = os.path.join(root_dir, 'snakemake', '3_peak_calling_CTK_se.snakemake')
+        elif not config['paired_end'] and config['peak_caller'] == 'CTK_par_clip':
+            snakefile = os.path.join(root_dir, 'snakemake', '3_peak_calling_CTK_par_clip_se.snakemake')
+        elif not config['paired_end'] and config['peak_caller'] == 'parclip_suit':
+            snakefile = os.path.join(root_dir, 'snakemake', '3_peak_calling_parclip_suite_se.snakemake')
+    
+    # 按照CLIP不同的方法来执行
+    elif args.step == 'PAR-CLIP':
+        snakefile = os.path.join(root_dir, 'snakemake', 'par_clip_pe.snakemake')
+
+    # logging snakemake command
+    snakemake_args = ['-p', '-k', '--use-conda', '-j', '15', '--rerun-incomplete',
+                      '--latency-wait', '20', '--snakefile', snakefile, '--configfile', user_config_file]
+    logger.debug('snakemake command: ' + str(snakemake_path) +
+                 ' ' + str(snakemake_args))
+
+    # execute snakemake command: based on snakemake file (constructed by config and step) and user_config_file
+    os.execv(snakemake_path, snakemake_args)

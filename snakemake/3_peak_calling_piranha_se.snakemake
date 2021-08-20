@@ -1,0 +1,44 @@
+
+## 测试成功
+include: './0_common.snakemake'
+
+output_dir = config.get("output_dir")
+summary_dir = config.get('summary_dir')
+
+def get_all_inputs(wildcards):
+    available_inputs = dict(
+        piranha_file=expand('{output_dir}/peak_calling_piranha/{sample_id}.20nt.0.01.bed',output_dir=output_dir, sample_id=sample_ids),
+    )
+    enabled_inputs = list(available_inputs.keys())
+    inputs = []
+    for key, l in available_inputs.items():
+        if key in enabled_inputs:
+            inputs += l
+    return inputs
+
+rule all:
+    input:
+        get_all_inputs
+
+###------------------------The output section---------------------------###
+
+rule peak_calling_piranha:
+    input:
+        bed_file='{output_dir}/bowtie_map/{sample_id}.bed'
+    output:
+        piranha_file='{output_dir}/peak_calling_piranha/{sample_id}.20nt.0.01.bed'
+    # conda:
+    #     "./envs/piranha.yaml"
+    # threads: 
+    #     config.get('threads_compress')
+    log:
+        '{output_dir}/log/peak_calling_piranha/{sample_id}.log'
+    shell:
+        '''Piranha \
+                -s \
+                -b 20 \
+                -d ZeroTruncatedNegativeBinomial \
+                -p 0.01 \
+                {input.bed_file} \
+                -o {output.piranha_file}
+        '''

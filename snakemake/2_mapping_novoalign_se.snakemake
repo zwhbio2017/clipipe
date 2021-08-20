@@ -1,0 +1,44 @@
+include: './0_common.snakemake'
+
+output_dir = config.get("output_dir")
+summary_dir = config.get('summary_dir')
+
+def get_all_inputs(wildcards):
+    available_inputs = dict(
+        novoalign_mapping_file=expand('{output_dir}/novoalign_map/{sample_id}.novoalign',output_dir=output_dir, sample_id=sample_ids),
+    )
+    enabled_inputs = list(available_inputs.keys())
+    inputs = []
+    for key, l in available_inputs.items():
+        if key in enabled_inputs:
+            inputs += l
+    return inputs
+
+rule all:
+    input:
+        get_all_inputs
+
+###------------------------The output section---------------------------###
+
+rule novoalign_mapping:
+    input:
+        fasta='{output_dir}/pre_process/{sample_id}.clipped.filtered.collapsed.trimmed.fa'
+    output:
+        novoalign_mapping_file='{output_dir}/novoalign_map/{sample_id}.novoalign'
+    params:
+        novoalign=config.get('root_dir') + '/bin/novocraft/novoalign',
+        novoalign_index=config.get('reference_dir') + '/novoalign_index/human_genome_hg19'
+    # threads: 
+    #     1
+    log:
+        '{output_dir}/log/novoalign_mapping/{sample_id}.log'
+    shell:
+        '''{params.novoalign} \
+            -F FA \
+            -t 85 \
+            -l 25 \
+            -r None \
+            -o Native \
+            -d {params.novoalign_index} \
+            -f {input.fasta} > {output.novoalign_mapping_file}
+        '''

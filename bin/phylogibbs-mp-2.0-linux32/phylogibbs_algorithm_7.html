@@ -1,0 +1,349 @@
+<!-- Creator     : groff version 1.20.1 -->
+<!-- CreationDate: Tue Nov 30 10:55:03 2010 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>PHYLOGIBBS_ALGORITHM</title>
+
+</head>
+<body>
+
+<h1 align="center">PHYLOGIBBS_ALGORITHM</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#SAMPLING AND SCORING">SAMPLING AND SCORING</a><br>
+<a href="#PHYLOGENY">PHYLOGENY</a><br>
+<a href="#MOVESET">MOVESET</a><br>
+<a href="#MOTIF-FINDING STRATEGY">MOTIF-FINDING STRATEGY</a><br>
+<a href="#OTHER ISSUES">OTHER ISSUES</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+<a href="#AUTHORS">AUTHORS</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">PhyloGibbs
+Algorithm &minus; A Gibbs motif sampler incorporating
+phylogeny and tracking statistics.</p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">(NOTE: This
+page has not been updated for PhyloGibbs-MP, and some of it
+may be inaccurate. Please consult the phylogibbs(1) manpage
+for accurate usage information.)</p>
+
+<p style="margin-left:11%; margin-top: 1em">PhyloGibbs is a
+motif finding algorithm that uses a Gibbs sampling strategy,
+takes the phylogenetic relationships of the input sequences
+rigorously into account, and assigns realistic posterior
+probabilities to reported sites using a novel
+annealing+tracking strategy.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The
+phylogibbs(1) manpage gives detailed instructions on using
+the program; this page attempts to give an overview of the
+internal workings of the algorithm, which should clarify the
+meaning of many of the options described in the manual
+page.</p>
+
+<h2>SAMPLING AND SCORING
+<a name="SAMPLING AND SCORING"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The idea of the
+Gibbs sampler is to sample the space of all possible
+&quot;binding site configurations&quot; that can be assigned
+to the input data. A binding site configuration is an
+assignment of a set of non-overlapping &quot;windows&quot;
+to input sequences, together with a assignment of
+&quot;colors&quot; to each of the windows. All windows of
+the same color are considered sites for the same
+&quot;motif&quot;. Binding site configurations are scored by
+assuming that all sites belonging to the same motif, i.e.
+that are colored the same, were drawn from a common weight
+matrix. All parts of the sequences not in colored windows
+are scored according to a &quot;background model&quot;.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The program
+assumes that all binding sites have a fixed length <i>w</i>
+that must be specified on the command line via the
+<b>&minus;m</b> option. The input sequence set is parsed
+into a set of all possible &quot;windows&quot;. In the
+phylogenetically-unrelated case, a window is just a set of
+<i>w</i> adjacent bases on a sequence. In the
+phylogenetically aligned case, a window can extend across
+multiple sequences; this is discussed below. Having built up
+a list of all possible windows, as well as detailed pointer
+structures telling us how windows can block other windows
+(due to overlapping sites), we proceed to &quot;select&quot;
+and &quot;unselect&quot; these windows by giving them
+&quot;colours&quot;: &quot;colour 0&quot; means not
+selected, and colours 1, 2, ... correspond to distinct
+motifs. For example, given a sequence as follows,</p>
+
+<p style="margin-left:22%; margin-top: 1em">&gt; Seq 1 <br>
+ACGATAGATGCGTGATGATATGCCCACAATAATACCCATGTGAGTGATTAATATAG
+<br>
+^^^^^^^^ ^^^^^^^^ ~~~~~~~~ ~~~~~~~~</p>
+
+<p style="margin-left:11%; margin-top: 1em">the sequence is
+56 bases long and the chosen motif width <i>w</i> is 8: thus
+we have 49 possible windows, starting at sites 0 through 48
+inclusive. The windows underlined with ^^^^^^^^ have colour
+1, the windows underlined with ~~~~~~~~ have colour 2, and
+all other possible windows have colour 0. Thus, the above is
+an example of a binding site configuration containing 4
+sites in total for 2 motifs.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Each
+&quot;configuration&quot; has a &quot;score&quot;, which is
+the posterior probability of the configuration given the
+sequence; by Bayes&rsquo; theorem, assuming a flat prior on
+configurations, this is proportional to the probability of
+seeing the sequence given the configuration. This is the
+probability that the windows were sampled from weight
+matrices, multiplied by the probability that the rest of the
+sequence was sampled from background. We normalise by the
+probability that the entire sequence was sampled from
+background. We sample the space of all configurations. An
+initial simulated-anneal phase seeks the best-scoring
+configuration, that is, the configuration that best explains
+the sequence. A tracking phase then assesses the
+significance of the &quot;clusters of sites&quot; found in
+the simulated anneal, by keeping statistics of how often
+each window is a part of each cluster).</p>
+
+<p style="margin-left:11%; margin-top: 1em">The details of
+the scoring are beyond the scope of this manpage; consult
+the references.</p>
+
+<h2>PHYLOGENY
+<a name="PHYLOGENY"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">To account for
+phylogeny, we first run the input sequences through a
+multiple-alignment program (such as Dialign) to identify
+conserved blocks. PhyloGibbs then parses the resulting
+multi-fasta sequence into &quot;windows&quot;: in unaligned
+regions, windows are just the same as before, but in aligned
+regions (where there are uppercase letters with matching
+vertical positions), we assume that any putative motif on
+one of those sequences in that region is not independent but
+has evolved with the other sequences from an ancestral
+motif. We therefore select this entire &quot;aligned
+block&quot; as a single window, and score it as a whole
+(again, the details of scoring are beyond the scope of this
+manpage). The sampling proceeds just as in the non-aligned
+case; the only difference is that windows may sometimes
+extend over multiple sequences, and be scored
+differently.</p>
+
+<p style="margin-left:22%; margin-top: 1em">&gt; Seq 1 <br>
+ACGATAGAtgcgtacga---atgCCACAATAA----gactagAGTG-TTAC-- <br>
+===2==== ---1---- ****3**** <br>
+&gt; Seq 2 <br>
+ACGATAGA---------------CCACAATAAagactagataAGTGaTTAaga <br>
+===2==== ***3****</p>
+
+<p style="margin-left:11%; margin-top: 1em">In the above
+example the region marked with ---1---- represents a
+single-sequence window in an unaligned region; the two
+regions marked ===2==== represent one window spanning two
+sequences in a conserved block; and the two regions marked
+***3**** represent an inconsistent window (because the gap
+in the first sequence damages the alignment of successive
+bases with the second). More complicated inconsistencies can
+arise when there are more than two aligned sequences. We
+have two options to deal with inconsistent sequences:
+<b>&minus;D</b> 1 splits them into smaller, consistent
+windows (in the above example, the two ***3**** regions will
+become two distinct single-sequence windows);
+<b>&minus;D</b> 2 disallows such regions altogether (thus
+assuming that genuine motifs are vanishingly unlikely to
+include indels).</p>
+
+<p style="margin-left:11%; margin-top: 1em">While we are
+not discussing the scoring here, it is worth mentioning that
+the scoring involves a &quot;relatedness parameter&quot;, an
+estimate for each sequence of the probability that a base is
+unmutated from its ancestor; this is supplied via the
+<b>&minus;H</b> and <b>&minus;L</b> parameters (see also the
+<b>&minus;G</b> parameter). The benefits of our strategy lie
+not just in better scoring of phylogeny but in reducing the
+search space by blocking conserved motifs together. Thus,
+even if the relatedness parameter is not known very
+accurately, a rough guess may be quite adequate. In general,
+for moderately-conserved sequences, values between 0.3 and
+0.6 are fine; very high values (high assumed conservation)
+may excessively penalise mismatches in conserved blocks,
+while very low values may artificially boost scores of
+&quot;accidentally&quot; conserved but non-functional
+blocks.</p>
+
+<h2>MOVESET
+<a name="MOVESET"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The moveset is
+designed for detailed balance maintenance, ergodicity, and
+good convergence. To this end we implement two kinds of
+moves: <b><br>
+Window-shift move (&minus;w)</b></p>
+
+<p style="margin-left:22%;">This move picks an
+already-coloured window that is not the only one in its
+colour, colours it zero, and then samples from all
+non-blocked colour-zero windows to replace it, assigning it
+any of the available colours or a new colour (not colour
+zero). It can be thought of as a &quot;shift+recolour&quot;
+move. It preserves the total number of windows across all
+colours. Under repeated iteration of this move combined with
+a simulated-annealing strategy, one converges rapidly to a
+good set of motifs.</p>
+
+<p style="margin-left:11%;"><b>Global-shift move
+(&minus;s)</b></p>
+
+<p style="margin-left:22%;">This move picks a colour and
+samples ways to shift every window in that colour uniformly
+by a constant amount. This is necessary because one can
+otherwise get stuck in suboptimal configurations that are
+shifted from optimal configurations, and cannot recover in
+reasonable sampling time via the previous single-window
+moves.</p>
+
+<h2>MOTIF-FINDING STRATEGY
+<a name="MOTIF-FINDING STRATEGY"></a>
+</h2>
+
+
+<p style="margin-left:22%; margin-top: 1em">By default, the
+program follows an anneal+track strategy of finding motifs.
+That is, by annealing it finds a candidate set of motifs,
+which it assigns into numbered &quot;clusters&quot; of sites
+to keep track of; then it samples for a long time (100
+cycles by default, each cycle containing several moves of
+each type per window), maintaining statistics of how often
+each window in the system is co-clustered with one of the
+tracked clusters (or the best current approximation to that
+cluster).</p>
+
+<p style="margin-left:11%; margin-top: 1em">We find it in
+general the best strategy to somewhat overestimate the
+number of types of motif (colours) expected to be found in
+the system, and be conservative during the annealing stage
+about the number of windows per colour. We would like to
+find a few strong candidate sites in each colour, and not
+pollute the cluster to be tracked with dubious sites;
+additional colours are harmless, even if the motifs they
+represent are spurious. The default options thus turn off
+colour-change moves and use conservative numbers of windows
+per colour (around 1 motif per 250 available windows per
+colour); one can adjust this if desired with the
+<b>&minus;I</b> option, and turn on colour-change moves
+during annealing with the <b>&minus;c</b> option. In the
+tracking phase, general, we find 100 cycles good enough to
+get a reasonable set of statistics, but if desired this can
+be increased (or decreased!) with the <b>&minus;S</b>
+option.</p>
+
+<h2>OTHER ISSUES
+<a name="OTHER ISSUES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The background
+model assumes the sequence is generated from an
+N-site-correlated Markov process; this gives a good estimate
+of the actual number of times a given string occurs in a
+large intergenic sequence, provided the required conditional
+probabilities were measured from the same intergenic
+sequence. The user can optionally specify an auxiliary file
+containing background sequence; otherwise, background
+correlations are computed from the input file directly, but
+by default downweighed with a pseudocount of uncorrelated
+single-site base frequencies.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The simulated
+anneal has three phases: a transient equilibriation phase, a
+slow cooling (&quot;anneal&quot;) phase that lasts by
+default 100 cycles and slightly lowers the temperature at
+each cycle, and a brief &quot;deep quench&quot; phase that
+samples for a while at almost zero temperature. Options are
+available to set the number of moves in each of these
+phases, the starting temperature, and the temperature
+increment.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Several other
+options (turning off matches on the other strand, looking
+for symmetric motifs, looking for dimers, various
+initialisation options) are discussed in the phylogibbs(1)
+manpage and do not need further discussion here.</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The
+phylogibbs(1) manpage (for usage and detailed command-line
+options) <br>
+R. Siddharthan, E. D. Siggia, E. van Nimwegen,
+&quot;PhyloGibbs: A Gibbs Sampling Motif Finder That
+Incorporates Phylogeny&quot;, PLoS Computational Biology
+(2005), 1(7): e67 <br>
+R. Siddharthan, &quot;PhyloGibbs-MP: Module prediction and
+discriminative motif finding by Gibbs sampling&quot;, PLoS
+Computational Biology (2008), to appear <br>
+Lawrence CE et al., Science <b>262</b> (1993) 208-214 and
+Liu JS et al., J. Amer. Stat. Assoc. <b>90</b> (1995),
+1156-1170 (for details of the original Gibbs sampler in
+biological motif finding)</p>
+
+<h2>AUTHORS
+<a name="AUTHORS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">PhyloGibbs-MP
+was developed and coded by Rahul Siddharthan, based on the
+earlier PhyloGibbs algorithm. See
+http://www.imsc.res.in/~rsidd/phylogibbs/ for contact
+information.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The PhyloGibbs
+algorithm was developed during 2002-2005 by <br>
+Rahul Siddharthan &lt;rsidd@remove-this.imsc.res.in&gt; <br>
+Erik van Nimwegen
+&lt;erik.vannimwegen@remove-this.unibas.ch&gt; <br>
+Eric D. Siggia
+&lt;siggia@remove-this.eds1.rockefeller.edu&gt; <br>
+The code was written by Rahul Siddharthan and Erik van
+Nimwegen.</p>
+<hr>
+</body>
+</html>

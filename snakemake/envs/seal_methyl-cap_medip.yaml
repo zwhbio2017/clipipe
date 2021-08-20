@@ -1,0 +1,13 @@
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - trim-galore=0.6.4
+  - bismark=0.22.3
+  - fastqc
+  - bowtie2
+  - macs2
+  - picard
+  - multiqc
+  - samtools=1.6
+  - deeptools

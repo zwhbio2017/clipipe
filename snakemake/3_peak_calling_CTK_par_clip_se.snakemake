@@ -1,0 +1,256 @@
+## 初略写完，尚未运行检查！！！！！！
+
+include: './0_common.snakemake'
+
+output_dir = config.get("output_dir")
+summary_dir = config.get('summary_dir')
+root_dir = config.get('root_dir')
+
+def get_all_inputs(wildcards):
+    available_inputs = dict(
+        tag_uniq_rgb_bed=expand('{output_dir}/CTK/tag.uniq.rgb.bed',output_dir=output_dir),
+        cat_ctk_mutation_uniq_bed_file=expand('{output_dir}/CTK/tag.uniq.mutation.txt',output_dir=output_dir),
+        ctk_del_bed_s13_bed=expand('{output_dir}/CTK/{sample_id}.tag.uniq.del.CIMS.s13.bed',output_dir=output_dir,sample_id=sample_ids),
+        ctk_sub_bed_s13_bed=expand('{output_dir}/CTK/{sample_id}.tag.uniq.sub.CIMS.s13.bed',output_dir=output_dir,sample_id=sample_ids),
+        ctk_ins_bed_s13_bed=expand('{output_dir}/CTK/{sample_id}.tag.uniq.ins.CIMS.s13.bed',output_dir=output_dir,sample_id=sample_ids),
+        ctk_t2c_bed_s13_bed=expand('{output_dir}/CTK/{sample_id}.tag.uniq.t2c.CIMS.s13.bed',output_dir=output_dir,sample_id=sample_ids)
+    )
+    enabled_inputs = list(available_inputs.keys())
+    inputs = []
+    for key, l in available_inputs.items():
+        if key in enabled_inputs:
+            inputs += l
+    return inputs
+
+rule all:
+    input:
+        get_all_inputs
+
+###------------------------The output section---------------------------###
+
+rule parsing_sam_file:
+    input:
+        sam_file='{output_dir}/bwa_mapping/{sample_id}.sam.gz'
+    output:
+        mutation_file='{output_dir}/CTK/{sample_id}.mutation.bed',
+        bed_file='{output_dir}/CTK/{sample_id}.tag.bed.gz'
+    threads:
+        1
+    log:
+        '{output_dir}/log/parsing_sam_file/{sample_id}.log'
+    shell:
+        '''perl {root_dir}/bin/ctk/parseAlignment.pl -V \
+            --map-qual 1 --min-len 18 --mutation-file {output.mutation_file} \
+            {input.sam_file} - | gzip -c > {output.bed_file}
+        '''
+
+
+rule collapse_PCR_duplicate:
+    input:
+        ctk_bed_file='{output_dir}/CTK/{sample_id}.tag.bed.gz'
+    output:
+        ctk_uniq_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.bed'
+    threads: 
+        config.get('threads_compress')
+    log:
+        '{output_dir}/log/collapse_PCR_duplicate/{sample_id}.log'
+    shell:
+        '''perl {root_dir}/bin/ctk/tag2collapse.pl \
+            -v -big \
+            -weight \
+            --weight-in-name \
+            --keep-max-score \
+            --keep-tag-name \
+            {input.ctk_bed_file} \
+            {output.ctk_uniq_bed_file}
+        '''
+
+rule join_mutation_with_tag_bed:
+    input:
+        ctk_mutation_bed_file='{output_dir}/CTK/{sample_id}.mutation.bed',
+        ctk_uniq_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.bed'
+    output:
+        ctk_mutation_uniq_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.mutation.txt'
+    threads:
+        config.get('threads_compress')
+    # conda:
+    #     "./envs/python2.7.yaml"
+    log:
+        '{output_dir}/log/join_mutation_with_tag_bed/{sample_id}.log'
+    shell:
+        '''python2 {root_dir}/bin/ctk/joinWrapper.py \
+            {input.ctk_mutation_bed_file} \
+            {input.ctk_uniq_bed_file} \
+            4 \
+            4 \
+            N \
+            {output.ctk_mutation_uniq_bed_file}
+        '''
+
+rule merging_biological_replicates:
+    input:
+        ctk_uniq_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.bed'
+    output:
+        ctk_uniq_rgb_bed='{output_dir}/CTK/{sample_id}.tag.uniq.rgb.bed'
+    threads:
+        config.get('threads_compress')
+    log:
+        '{output_dir}/log/merging_biological_replicates/{sample_id}.log'
+    shell:
+    # add color
+        '''perl {root_dir}/bin/ctk/bed2rgb.pl \
+            -v \
+            -col "188,0,0" \
+            {input.ctk_uniq_bed_file} {output.ctk_uniq_rgb_bed}
+        '''
+
+rule concatenate_bed_file:
+    input:
+        ctk_uniq_rgb_bed=expand('{output_dir}/CTK/{sample_id}.tag.uniq.rgb.bed',output_dir=output_dir,sample_id=sample_ids),
+        ctk_mutation_uniq_bed_file=expand('{output_dir}/CTK/{sample_id}.tag.uniq.mutation.txt',output_dir=output_dir,sample_id=sample_ids)
+    output:
+        cat_ctk_uniq_rgb_bed='{output_dir}/CTK/tag.uniq.rgb.bed',
+        cat_ctk_mutation_uniq_bed_file='{output_dir}/CTK/tag.uniq.mutation.txt'
+    threads:
+        config.get('threads_compress')
+    log:
+        expand('{output_dir}/log/concatenate_bed_file/{sample_id}.log',output_dir=output_dir,sample_id=sample_ids)
+    shell:
+        '''cat {input.ctk_uniq_rgb_bed} > {output.cat_ctk_uniq_rgb_bed};
+        cat {input.ctk_mutation_uniq_bed_file} > {output.cat_ctk_mutation_uniq_bed_file}
+        '''
+
+
+
+rule peak_calling_with_no_statistical_significance:
+    input:
+        ctk_uniq_rgb_bed='{output_dir}/CTK/{sample_id}.tag.uniq.rgb.bed'
+    output:
+        peak_bed='{output_dir}/CTK/{sample_id}.tag.uniq.peak.bed',
+        boundary_bed='{output_dir}/CTK/{sample_id}.tag.uniq.peak.boundary.bed',
+        halfPH_bed='{output_dir}/CTK/{sample_id}.tag.uniq.peak.halfPH.bed'
+    threads:
+        config.get('threads_compress')
+    log:
+        '{output_dir}/log/peak_calling_with_no_statistical_significance/{sample_id}.log'
+    shell:
+        '''perl {root_dir}/bin/ctk/tag2peak.pl -big -ss -v --valley-seeking --valley-depth 0.9 \
+            {input.ctk_uniq_rgb_bed} {output.peak_bed} \
+            --out-boundary {output.boundary_bed} \
+            --out-half-PH {output.halfPH_bed}
+        '''
+
+rule peak_calling_with_statistical_significance:
+    input:
+        ctk_uniq_rgb_bed='{output_dir}/CTK/{sample_id}.tag.uniq.rgb.bed'
+    output:
+        peak_bed='{output_dir}/CTK/{sample_id}.tag.uniq.peak.sig.bed',
+        boundary_bed='{output_dir}/CTK/{sample_id}.tag.uniq.peak.sig.boundary.bed',
+        halfPH_bed='{output_dir}/CTK/{sample_id}.tag.uniq.peak.sig.halfPH.bed'
+    threads:
+        config.get('threads_compress')
+    log:
+        '{output_dir}/log/peak_calling_with_statistical_significance/{sample_id}.log'
+    shell:
+        '''perl {root_dir}/bin/ctk/tag2peak.pl -big -ss -v --valley-seeking -p 0.05 --valley-depth 0.9 --multi-test --dbkey hg19
+            {input.ctk_uniq_rgb_bed} {output.peak_bed} \
+            --out-boundary {output.boundary_bed} \
+            --out-half-PH {output.halfPH_bed}
+        '''
+
+
+rule get_specific_types_of_mutations:
+    input:
+        ctk_mutation_uniq_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.mutation.bed'
+    output:
+        ctk_del_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.del.txt',
+        ctk_sub_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.sub.txt',
+        ctk_ins_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.ins.txt',
+        ctk_t2c_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.t2c.txt',
+        mutation_stat_file='{output_dir}/CTK/{sample_id}.tag.uniq.mutation.stat.txt'
+    threads:
+        1
+    shell:
+        ''' perl {root_dir}/bin/ctk/getMutationType.pl -t del {input.ctk_mutation_uniq_bed_file} {output.ctk_del_bed_file};
+            perl {root_dir}/bin/ctk/getMutationType.pl -t sub {input.ctk_mutation_uniq_bed_file} {output.ctk_sub_bed_file};
+            perl {root_dir}/bin/ctk/getMutationType.pl -t ins {input.ctk_mutation_uniq_bed_file} {output.ctk_ins_bed_file};
+            perl {root_dir}/bin/ctk/getMutationType.pl -t t2c {input.ctk_mutation_uniq_bed_file} {output.ctk_t2c_bed_file} --summary {output.mutation_stat_file};
+        '''
+
+
+rule CIMS_get_peaks_del:
+    input:
+        ctk_del_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.del.txt'
+    output:
+        ctk_del_bed_s13_txt='{output_dir}/CTK/{sample_id}.tag.uniq.del.CIMS.s13.txt',
+        ctk_del_bed_s13_bed='{output_dir}/CTK/{sample_id}.tag.uniq.del.CIMS.s13.bed'
+    threads:
+        1
+    shell:
+        '''awk '{{if($9<=0.05) {{print $0}}}}' {input.ctk_del_bed_file} | sort -k 9,9n -k 8,8nr -k 7,7n > {output.ctk_del_bed_s13_txt};
+            cut -f 1-6 {output.ctk_del_bed_s13_txt} > {output.ctk_del_bed_s13_bed}
+        '''
+
+rule CIMS_get_peaks_sub:
+    input:
+        ctk_sub_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.sub.txt'
+    output:
+        ctk_sub_bed_s13_txt='{output_dir}/CTK/{sample_id}.tag.uniq.sub.CIMS.s13.txt',
+        ctk_sub_bed_s13_bed='{output_dir}/CTK/{sample_id}.tag.uniq.sub.CIMS.s13.bed'
+    threads:
+        1
+    shell:
+        '''awk '{{if($9<=0.05) {{print $0}}}}' {input.ctk_sub_bed_file} | sort -k 9,9n -k 8,8nr -k 7,7n > {output.ctk_sub_bed_s13_txt};
+            cut -f 1-6 {output.ctk_sub_bed_s13_txt} > {output.ctk_sub_bed_s13_bed}
+        '''
+
+rule CIMS_get_peaks_ins:
+    input:
+        ctk_ins_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.ins.txt'
+    output:
+        ctk_ins_bed_s13_txt='{output_dir}/CTK/{sample_id}.tag.uniq.ins.CIMS.s13.txt',
+        ctk_ins_bed_s13_bed='{output_dir}/CTK/{sample_id}.tag.uniq.ins.CIMS.s13.bed'
+    threads:
+        1
+    shell:
+        '''awk '{{if($9<=0.05) {{print $0}}}}' {input.ctk_ins_bed_file} | sort -k 9,9n -k 8,8nr -k 7,7n > {output.ctk_ins_bed_s13_txt};
+            cut -f 1-6 {output.ctk_ins_bed_s13_txt} > {output.ctk_ins_bed_s13_bed}
+        '''
+
+rule CIMS_get_peaks_t2c:
+    input:
+        ctk_t2c_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.t2c.txt'
+    output:
+        ctk_t2c_bed_s13_txt='{output_dir}/CTK/{sample_id}.tag.uniq.t2c.CIMS.s13.txt',
+        ctk_t2c_bed_s13_bed='{output_dir}/CTK/{sample_id}.tag.uniq.t2c.CIMS.s13.bed'
+    threads:
+        1
+    shell:
+        '''awk '{{if($9<=0.05) {{print $0}}}}' {input.ctk_t2c_bed_file} | sort -k 9,9n -k 8,8nr -k 7,7n > {output.ctk_t2c_bed_s13_txt};
+            cut -f 1-6 {output.ctk_t2c_bed_s13_txt} > {output.ctk_t2c_bed_s13_bed}
+        '''
+
+# rule :
+#     input:
+
+#     output:
+
+#     threads:
+
+#     log:
+
+#     shell:
+
+
+
+# rule :
+#     input:
+
+#     output:
+
+#     threads:
+
+#     log:
+
+#     shell:
+

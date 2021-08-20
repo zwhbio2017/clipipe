@@ -1,0 +1,7 @@
+channels:
+ - bioconda
+ - conda-forge
+dependencies:
+ - bs-seeker2=2.1.7
+ - samtools=1.9
+ - bowtie=1.2.3

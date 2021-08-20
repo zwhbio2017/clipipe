@@ -1,0 +1,19 @@
+Metadata-Version: 1.1
+Name: iCLIPro
+Version: 0.1.1
+Summary: iCLIP read overlap test - indentification and correction of potential systematic errors in iCLIP data.
+Home-page: http://www.biolab.si/iCLIPro
+Author: Tomaz Curk
+Author-email: tomaz.curk@fri.uni-lj.si
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: GNU General Public License (GPL)
+Classifier: Operating System :: POSIX
+Classifier: Programming Language :: Python
+Requires: pysam (>= 0.6)
+Requires: matplotlib

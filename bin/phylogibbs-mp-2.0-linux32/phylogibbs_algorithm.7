@@ -1,0 +1,232 @@
+.\"                       PhyloGibbs
+.\"
+.\"  Algorithm developed by Rahul Siddharthan, Eric D. Siggia
+.\"  and Erik van Nimwegen at The Rockefeller University, New York,
+.\"  the Institute of Mathematical Sciences, Chennai, India 
+.\"  and the University of Basel, Switzerland
+.\"
+.\"  This code written by and copyright (C) 2005 
+.\"  Rahul Siddharthan, Erik van Nimwegen
+.\"  Licensed under the GNU General Public License (see COPYING)
+.\"  $Id: phylogibbs_algorithm.7,v 1.13 2008-08-27 15:59:07 rsidd Exp $
+.\"
+.TH PHYLOGIBBS_ALGORITHM 7 "August 16, 2005"
+.SH NAME
+PhyloGibbs Algorithm \- A Gibbs motif sampler incorporating phylogeny
+and tracking statistics.
+.SH DESCRIPTION
+(NOTE: This page has not been updated for PhyloGibbs-MP, and some of it
+may be inaccurate. Please consult the phylogibbs(1) manpage for accurate
+usage information.)
+.PP
+PhyloGibbs is a motif finding algorithm that uses a Gibbs sampling
+strategy, takes the phylogenetic relationships of the input sequences
+rigorously into account, and assigns realistic posterior probabilities
+to reported sites using a novel annealing+tracking strategy. 
+.PP
+The phylogibbs(1) manpage gives detailed instructions on using the
+program; this page attempts to give an overview of the internal
+workings of the algorithm, which should clarify the meaning of many of
+the options described in the manual page. 
+.SH SAMPLING AND SCORING
+The idea of the Gibbs sampler is to sample the space of all possible
+"binding site configurations" that can be assigned to the input
+data. A binding site configuration is an assignment of a set of
+non-overlapping "windows" to input sequences, together with a
+assignment of "colors" to each of the windows. All windows of the same
+color are considered sites for the same "motif". Binding site
+configurations are scored by assuming that all sites belonging to the
+same motif, i.e. that are colored the same, were drawn from a common
+weight matrix. All parts of the sequences not in colored windows are
+scored according to a "background model". 
+.PP
+The program assumes that all binding sites have a fixed length \fIw\fR
+that must be specified on the command line via the \fB\-m\fR option.
+The input sequence set is parsed into a set of all possible "windows".
+In the phylogenetically-unrelated case, a window is just a set of
+\fIw\fR adjacent bases on a sequence. In the phylogenetically aligned
+case, a window can extend across multiple sequences; this is discussed
+below.  Having built up a list of all possible windows, as well as
+detailed pointer structures telling us how windows can block other
+windows (due to overlapping sites), we proceed to "select" and
+"unselect" these windows by giving them "colours": "colour 0" means
+not selected, and colours 1, 2, ... correspond to distinct motifs.
+For example, given a sequence as follows,
+.PP
+.RS
+.nf
+> Seq 1
+ACGATAGATGCGTGATGATATGCCCACAATAATACCCATGTGAGTGATTAATATAG
+  ^^^^^^^^   ^^^^^^^^            ~~~~~~~~     ~~~~~~~~
+.fi
+.RE
+.PP
+the sequence is 56 bases long and the chosen motif width \fIw\fR is 8:
+thus we have 49 possible windows, starting at sites 0 through 48
+inclusive.  The windows underlined with ^^^^^^^^ have colour 1, the
+windows underlined with ~~~~~~~~ have colour 2, and all other possible
+windows have colour 0. Thus, the above is an example of a binding site
+configuration containing 4 sites in total for 2 motifs.
+.PP
+Each "configuration" has a "score", which is the posterior probability
+of the configuration given the sequence; by Bayes' theorem, assuming a
+flat prior on configurations, this is proportional to the probability
+of seeing the sequence given the configuration.  This is the
+probability that the windows were sampled from weight matrices,
+multiplied by the probability that the rest of the sequence was
+sampled from background.  We normalise by the probability that the
+entire sequence was sampled from background.  We sample the space of
+all configurations. An initial simulated-anneal phase seeks the 
+best-scoring configuration, that is, the configuration that best 
+explains the sequence.  A tracking phase then assesses the
+significance of the "clusters of sites" found in the simulated
+anneal, by keeping statistics of how often each window is a
+part of each cluster).
+.PP
+The details of the scoring are beyond the scope of this manpage;
+consult the references.
+.SH PHYLOGENY
+To account for phylogeny, we first run the input sequences through
+a multiple-alignment program (such as Dialign) to identify conserved
+blocks.  PhyloGibbs then parses the resulting multi-fasta sequence into
+"windows": in unaligned regions, windows are just the same as before,
+but in aligned regions (where there are uppercase letters with
+matching vertical positions), we assume that any putative motif on one
+of those sequences in that region is not independent but has evolved with
+the other sequences from an ancestral motif.  We therefore select this
+entire "aligned block" as a single window, and score it as a whole
+(again, the details of scoring are beyond the scope of this manpage).
+The sampling proceeds just as in the non-aligned case; the only
+difference is that windows may sometimes extend over multiple
+sequences, and be scored differently.
+.PP
+.RS
+.nf
+> Seq 1
+ACGATAGAtgcgtacga---atgCCACAATAA----gactagAGTG-TTAC--
+===2==== ---1----                         ****3****
+> Seq 2
+ACGATAGA---------------CCACAATAAagactagataAGTGaTTAaga
+===2====                                  ***3****
+.fi
+.RE
+.PP
+In the above example the region marked with ---1---- represents a
+single-sequence window in an unaligned region; the two regions marked
+===2==== represent one window spanning two sequences in a conserved
+block; and the two regions marked ***3**** represent an inconsistent
+window (because the gap in the first sequence damages the alignment of
+successive bases with the second).  More complicated inconsistencies
+can arise when there are more than two aligned sequences.  We have two
+options to deal with inconsistent sequences: \fB\-D\fR 1 splits them
+into smaller, consistent windows (in the above example, the two
+***3**** regions will become two distinct single-sequence windows);
+\fB\-D\fR 2 disallows such regions altogether (thus assuming that
+genuine motifs are vanishingly unlikely to include indels).
+.PP
+While we are not discussing the scoring here, it is worth mentioning
+that the scoring involves a "relatedness parameter", an estimate for
+each sequence of the probability that a base is unmutated from its
+ancestor; this is supplied via the \fB\-H\fR and \fB\-L\fR parameters
+(see also the \fB\-G\fR parameter).  The benefits of our strategy lie
+not just in better scoring of phylogeny but in reducing the search
+space by blocking conserved motifs together.  Thus, even if the
+relatedness parameter is not known very accurately, a rough guess
+may be quite adequate.  In general, for moderately-conserved
+sequences, values between 0.3 and 0.6 are fine; very high values (high
+assumed conservation) may excessively penalise mismatches in conserved
+blocks, while very low values may artificially boost scores of
+"accidentally" conserved but non-functional blocks.
+.SH MOVESET
+The moveset is designed for detailed balance maintenance,
+ergodicity, and good convergence.  To this end we implement two kinds
+of moves:
+.TP
+.B Window-shift move (\-w)
+This move picks an already-coloured window that is not the only one in
+its colour, colours it zero, and then samples from all non-blocked
+colour-zero windows to replace it, assigning it any of the available
+colours or a new colour (not colour zero).  It can be thought
+of as a "shift+recolour" move.  It preserves the total number of
+windows across all colours.  Under repeated iteration of this move
+combined with a simulated-annealing strategy, one converges rapidly to 
+a good set of motifs.
+.TP
+.B Global-shift move (\-s)
+This move picks a colour and samples ways to shift every window in
+that colour uniformly by a constant amount.  This is necessary because
+one can otherwise get stuck in suboptimal configurations that are
+shifted from optimal configurations, and cannot recover in reasonable
+sampling time via the previous single-window moves.
+.TP 
+.SH MOTIF-FINDING STRATEGY
+By default, the program follows an anneal+track strategy of finding
+motifs.  That is, by annealing it finds a candidate set of motifs,
+which it assigns into numbered "clusters" of sites to keep track of;
+then it samples for a long time (100 cycles by default, each cycle
+containing several moves of each type per window), maintaining
+statistics of how often each window in the system is co-clustered with
+one of the tracked clusters (or the best current approximation to that
+cluster).
+.PP
+We find it in general the best strategy to somewhat overestimate the
+number of types of motif (colours) expected to be found in the system,
+and be conservative during the annealing stage about the number of
+windows per colour.  We would like to find a few strong candidate
+sites in each colour, and not pollute the cluster to be tracked with
+dubious sites; additional colours are harmless, even if the motifs
+they represent are spurious.  The default options thus turn off
+colour-change moves and use conservative numbers of windows per colour
+(around 1 motif per 250 available windows per colour); one can adjust
+this if desired with the \fB\-I\fR option, and turn on colour-change
+moves during annealing with the \fB\-c\fR option.  In the tracking
+phase, general, we find 100 cycles good enough to get a reasonable set
+of statistics, but if desired this can be increased (or decreased!)
+with the \fB\-S\fR option.
+.SH OTHER ISSUES
+The background model assumes the sequence is generated from an
+N-site-correlated Markov process; this gives a good estimate of the
+actual number of times a given string occurs in a large intergenic
+sequence, provided the required conditional probabilities were
+measured from the same intergenic sequence.  The user can optionally
+specify an auxiliary file containing background sequence; otherwise,
+background correlations are computed from the input file directly, but
+by default downweighed with a pseudocount of uncorrelated single-site
+base frequencies. 
+.PP 
+The simulated anneal has three phases: a transient equilibriation
+phase, a slow cooling ("anneal") phase that lasts by default 100
+cycles and slightly lowers the temperature at each cycle, and a brief
+"deep quench" phase that samples for a while at almost zero
+temperature.  Options are available to set the number of moves in each
+of these phases, the starting temperature, and the temperature
+increment.  
+.PP
+Several other options (turning off matches on the other strand,
+looking for symmetric motifs, looking for dimers, various
+initialisation options) are discussed in the
+phylogibbs(1) manpage and do not need further discussion here.
+.SH SEE ALSO
+The phylogibbs(1) manpage (for usage and detailed command-line options)
+.br
+R. Siddharthan, E. D. Siggia, E. van Nimwegen, "PhyloGibbs: A Gibbs Sampling Motif Finder That Incorporates Phylogeny", PLoS Computational Biology (2005), 1(7): e67
+.br
+R. Siddharthan, "PhyloGibbs-MP: Module prediction and discriminative motif finding by Gibbs sampling", PLoS Computational Biology (2008), to appear
+.br
+Lawrence CE et al., Science \fB262\fR (1993) 208-214 and Liu JS et al.,
+J. Amer. Stat. Assoc. \fB90\fR (1995), 1156-1170 (for details of the
+original Gibbs sampler in biological motif finding)
+.SH AUTHORS
+PhyloGibbs-MP was developed and coded by Rahul Siddharthan, based on
+the earlier PhyloGibbs algorithm.  See
+http://www.imsc.res.in/~rsidd/phylogibbs/ for contact information.
+
+The PhyloGibbs algorithm was developed during 2002-2005 by
+.br
+    Rahul Siddharthan <rsidd@remove-this.imsc.res.in>
+.br
+    Erik van Nimwegen <erik.vannimwegen@remove-this.unibas.ch>
+.br
+    Eric D. Siggia <siggia@remove-this.eds1.rockefeller.edu>
+.br
+The code was written by Rahul Siddharthan and Erik van Nimwegen.

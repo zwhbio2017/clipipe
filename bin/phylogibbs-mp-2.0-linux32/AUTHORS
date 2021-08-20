@@ -1,0 +1,12 @@
+The PhyloGibbs algorithm was developed by:
+    Rahul Siddharthan <rsidd@imsc.res.in> 
+       (The Institute of Mathematical Sciences, Chennai, India)
+    Eric D. Siggia <siggia@eds1.rockefeller.edu>
+       (The Rockefeller University, New York, USA)
+    Erik van Nimwegen <Erik.Vannimwegen@unibas.ch>
+       (Biozentrum, University of Basel, Switzerland)
+
+The code was written by and is copyright (C) 2005 
+    Rahul Siddharthan and Erik van Nimwegen.
+
+Licensed under the GNU General Public License (see COPYING)

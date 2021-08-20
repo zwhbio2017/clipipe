@@ -1,0 +1,12 @@
+PARCLIP_suite v1.0
+
+To install suite unarchive zip file into desired directory with command 
+ 
+tar -xvf parclip_suite_v1.tar.gz
+
+To add humane reference enter PARCLIP_suite directory and unzip Human_transcriptome_reference.tar.gz archive.
+It should create 'Human_transcriptome_reference' subdirectory with bowtie 1 formatted databases and configuration 
+file for this database. This configuration file should be used for this database and sample dataaset.
+Configuration file can be copied and adjusted to use alternative hierarhies of annotation or other databases. 
+
+Sample dataset with finale results are in test.tar.gz archive. 

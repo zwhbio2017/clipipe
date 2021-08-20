@@ -1,0 +1,8 @@
+channels:
+ - bioconda
+ - conda-forge
+dependencies:
+ - pigz=2.3.4
+ - star=2.5.3a
+ - gatk4=4.1.4.0
+ - picard=2.21.1

@@ -1,0 +1,97 @@
+Changes made since PhyloGibbs-1.0:
+General: removed usedimer and friends (thus, also removed one superfluous
+     parameter in moveweight.[ch])
+initroutines.c: remove if trackedbins then no-anneal stuff: take care of
+	this in main.c
+initroutines.c: add a default value for Ncolm if set to -1.
+initroutines.c: change default wwidth back to 10 from 12.
+parseopts.c, interspecies.h: added -W option (write only at end of anneal)
+	(UPDATE - changed this to reverse its meaning)
+parseopts.c, interspecies.h: added -v option (verbose)
+	Now, default output to stdout is minimal progress information
+	-q suppresses all output to stdout (stderr still reports errors)
+	-v does old-style verbose output
+parseopts.c: disallow negative values for betaincr, with warning
+
+main.c : removed rNcolm rNwinm etc. v.Ncolm is never -1 after initroutines
+	is done.
+main.c : trackedbins was being cleaned up before the tracking phase 
+     if it existed.  This is wrong obviously -- if it existed it was
+     specified with -A.
+main.c: if colour moves are specified, the estimates of Ncolm, Nwinm etc
+     in initroutines may be inappropriate: scale them by new number of
+     colours/windows after transient phase.
+main.c: add progress bar.
+main.c: randomise current state before tracking only when tracking an
+    annealed cluster.  If tracking a supplied set of windows, we're 
+    starting from an equilibriated state already. 
+
+initwindows.c,interspecies.h,new files renumberwindowseqs.[ch]:
+    There was some confusion of what the "seq" element of window means:
+    originally it meant both the index of the sequence and the species
+    index.  But when I allowed multiple alignments (like ">>") the
+    second meaning broke.  I have now added a new window element "species"
+    and a routine renumberwindowseqs() that initialises this from
+    the seq element.
+
+renumberwindowseqs.c: Optionally, the ->species field is initialised
+	by matching labels (supplied via -l) with sequence headers.
+
+setwinbasecount.c: Changed one instance of thisseq=g_array_index(win->seq,...)
+    to thisseq=g_array_index(win->species,...).  Removed other, superfluous
+    instances of thisseq etc.
+
+initroutines.c: Do not pad v->seqmuset with v->nomutprob: take care of this
+    in setwinbasecount.c
+
+setwinbasecount.c: if thisseq is < v->seqmuset->len then thismu is 
+    taken from seqmuset else it is set to v->nomutprob.
+
+parseopts.c: Added -l option, changed return type from void to int
+    (which it already was in parseopts.h)
+
+main.c: if parseopts errors out, quit
+
+parseopts.c, etc: changed meaning of -W to write at every cycle
+    (changed default to only write at end).
+
+new files commonroutines.[ch] : contains string-processing and other
+  stuff that will be required by binprint.c, trackedbinprint.c and
+  others.
+
+trackedbinprint.c: changed weight matrix printout to new transfac-like
+  format
+binprint.c: include a weight-matrix printout with same format as in
+  trackedbinprint.c
+
+commonroutines.c, [tracked]binprint.c: small changes from Erik
+
+manpage phylogibbs.1 : reorganisation into "essential" and "advanced"
+  options, intro rewritten by Eric with small fixes from me, entries 
+  for -H, -l, -G rewritten following Eric's ideas.
+
+manpage phylogibbs_algorithm.7: several changes, brought up to date
+
+Autoconf-ised the whole thing, moved all source files into src/ .
+Moved README.first to README.  Created a file README.AUTOCONF
+saying what the autoconf setup is about (not part of a distributed
+tarball).
+
+Added errorchecking for bases, fixed bugs in "-X = blocked base".
+
+Made -D autodetect (if it sees a - character it assumes alignment).
+-H or -G is still required for aligned sequence.
+
+Changed -i to also initialise "direction" of initially selected
+window, and added stricter errorchecking for bases.
+
+New -L option to handle general phylogenies, with changes to
+setwinbasecount.c and other places, and new files tree_routines.[ch]
+
+Some bugfixes and memory leak plugs relating to -L (one of the memory
+leaks was old but wasn't severe without -L).
+
+New option -E (tracking cutoff).
+
+New option -R (print site positions as negative numbers from end of
+seq)

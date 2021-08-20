@@ -1,0 +1,18 @@
+This is a Linux 32-bit binary. 
+ 
+Install the file "phylogibbs-mp" in the "program" subdirectory into
+a directory of your choice (say "$HOME"/bin), set your path 
+accordingly and run it.
+
+Manual pages are in phylogibbs_1.html and
+phylogibbs_algorithm_7.html (html versions) and phylogibbs.1 and
+phylogibbs_algorithm.1 (Unix man pages).
+
+The "Examples" directory is currently empty, but read the manual
+and the notes.
+
+If you have previously used PhyloGibbs 1.0, there are significant
+differences and some of the commandline options have changed...
+
+For any further help, contact me.
+Rahul Siddharthan <rsidd@imsc.res.in>

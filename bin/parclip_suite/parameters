@@ -1,0 +1,17 @@
+#!/usr/bin/perl
+
+# directory with scripts
+$script_directory="./";
+
+# use or not to use cutadapt
+$use_cutadapt="No";
+
+# cutadapt executable, if it is not in system path program name should contain full path 
+$cutadapt="cutadapt";
+
+# parameters to be transferred to cutadapt program, edit -a for 3' adapters and -g for 5', -b for alternative for both 3' and 5'
+$cutadapt_parameters="-a TCGTATGCCGTCTTCTGCTTG -g AATGATACGGCGACCACCGACAGGTTCAGAGTTCTACAGTCCGACGATC -b CGTACGCGGGTTTAAACGA -b CTCATCTTGGTCGTACGCGGAATAGTTTAAACTGT";
+
+# bowtie executables, if it is not in system path program name should contain full path
+$bowtie="bowtie";
+

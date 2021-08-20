@@ -1,0 +1,48 @@
+shell.prefix('set -x; set -e;')
+import os, yaml, re, logging
+
+# load default_config and combine to all config
+with open(config.get("default_config_file"), 'r') as f:
+    default_config = yaml.load(f, Loader=yaml.FullLoader)
+
+# combine default_config and user_config
+default_config.update(config)
+config = default_config
+
+# read sample ids from file
+with open(os.path.join(config.get("data_dir"), 'sample_ids.txt'), 'r') as f:
+    sample_ids = f.read().split()
+for sample_id in sample_ids:
+    if '.' in sample_id:
+        raise ValueError('"." is not allowed in sample ID: {}'.format(sample_id))
+
+# ## 后续用到的变量
+# sub_matrix_regex = '(mirna_only)'
+# count_method_regex = '(featurecounts)|(htseq)|(domains_combined)|(transcript)|(transcript_long)|(mirna_and_domains)|(mirna_and_domains_rna)|(transcript_mirna)|(featurecounts_mrna)|(featurecounts_lncrna)'
+# imputation_method_regex = '(scimpute_count)|(viper_count)|(null)'
+# normalization_method_regex = '(SCnorm)|(TMM)|(RLE)|(CPM)|(CPM_top)|(CPM_rm)|(CPM_refer)|(UQ)|(null)'
+# batch_removal_method_with_batchinfo_regex = '(ComBat)|(limma)'
+# batch_removal_method_without_batchinfo_regex = '(RUV)|(RUVn)|(null)'
+
+# 后边是一系列的function
+## 
+def auto_gzip_input(template):
+    '''Input function that automatically detect gzip files
+    '''
+    def get_filename(wildcards):
+        gzip_names = expand(template + '.gz', **wildcards)
+        if all(os.path.exists(f) for f in gzip_names):
+            return gzip_names
+        original_names = expand(template, **wildcards)
+        #if all(os.path.exists(f) for f in original_names):
+        return original_names
+        
+    return get_filename
+
+
+sub_matrix_regex = '(mirna_only)'
+count_method_regex = '(featurecounts)|(htseq)|(domains_combined)|(transcript)|(transcript_long)|(mirna_and_domains)|(mirna_and_domains_rna)|(transcript_mirna)|(featurecounts_mrna)|(featurecounts_lncrna)'
+imputation_method_regex = '(scimpute_count)|(viper_count)|(null)'
+normalization_method_regex = '(SCnorm)|(TMM)|(RLE)|(CPM)|(CPM_top)|(CPM_rm)|(CPM_refer)|(UQ)|(null)'
+batch_removal_method_with_batchinfo_regex = '(ComBat)|(limma)'
+batch_removal_method_without_batchinfo_regex = '(RUV)|(RUVn)|(null)'

@@ -1,0 +1,151 @@
+#!/usr/bin/env python
+
+import getopt, sys, os
+import iCLIPro
+
+MAPQ_TH = 10
+MAPQ_TH_MIN = 0
+MAPQ_TH_MAX = 100
+
+READ_LEN_GROUPS = "A:16-39,A1:16-25,A2:26-32,A3:33-39,B:42"
+
+cur_dir = os.getcwd()
+
+def usage(longer=False):
+    if longer:
+        print "BAM splitter"
+        print "^^^^^^^^^^^^"
+        print
+
+    print "Usage: iCLIPro_bam_splitter [options] <in1.bam>"
+    print
+    print "Options:"
+    print "    -o FOLDER  output folder (default is cwd - current working directory)"
+    print "    -q INT     use only reads with minimum mapping quality (mapq) (%s..%s, default: %s)" % (
+          MAPQ_TH_MIN, MAPQ_TH_MAX, MAPQ_TH)
+    print "    -g LIST    read len groups (default: \"%s\")" % READ_LEN_GROUPS
+    print "    -h         longer help"
+    print
+
+    if longer:
+        print """\
+For given input BAM file [in.bam] the script will generate
+an output bam file for each read group.
+
+Reads get grouped based on their length (parameter -g). Each
+group of reads is used to generate three bedGraphs files
+with the following reference positions:
+  * one nucleotide before first mapped nucleotide
+  * center of the read
+  * end of the read
+
+Read (query template) names in BAM file should include a record
+of form expressed with this regular expression: ``:rbc[ATCGN]+:``.
+The ending colon can be omitted if random barcode record is placed
+at the end of the name. Some valid examples::
+
+   D3FCO8P1:206:C2M53ACXX:8:1207:17086:80291:1:N:0:rbcTGTAC: 272     1       11861 ... 
+   D3FCO8P1:206:C2M53ACXX:8:1101:6625:73240:1:N:0:rbcCCGCC   16      1       11976 ...
+   D3FCO8P1:206:C2M53ACXX:8:1203:17298:81179:rbcCCGCC:1:N:0  16      1       11976 ...
+
+Random barcodes can be specified at the end of the name but
+must be preceded by colon, for example::
+
+   D3FCO8P1:206:C2M53ACXX:8:1207:17086:80291:1:N:0:TGTAC     272     1       11861 ... 
+   D3FCO8P1:206:C2M53ACXX:8:1101:6625:73240:1:N:0   :CCGCC   16      1       11976 ...
+   D3FCO8P1:206:C2M53ACXX:8:1203:17298:81179:1:N:0 :CCGCC    16      1       11976 ...
+
+If no random barcode information is available, then the script will
+most likely be able to work with the original read names. In such
+case, please check that the read names do not include any text
+that conforms to the rules for specifying random barcode as it
+may mislead the script.
+
+The script outputs a list of identified random barcodes.
+You should check the list to make sure that proper random barcode
+information is being used.
+
+Parameter -q:
+  Consider only reads that pass the minimum mapping quality,
+  ignore the rest.
+
+Parameter -g:
+  iCLIPro needs to group reads based on their length.
+  Any number of (overlapping) groups can be specified. For each
+  group, an interval (INT1-INT2) or single value (INT) of the
+  read lengths in the group can be specified.
+
+""" 
+
+def main():
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "ho:q:g:", [])
+    except getopt.GetoptError as err:
+        usage()
+        sys.exit(2)
+
+    output_folder = cur_dir
+    mapq_th = MAPQ_TH
+    readlen_groups = READ_LEN_GROUPS
+
+    for opt, arg in opts:
+        if opt == '-h':
+            usage(True)
+            sys.exit()
+        elif opt in ("-o"):
+            output_folder = arg
+        elif opt in ("-q"):
+            mapq_th = int(arg)
+        elif opt in ("-g"):
+            readlen_groups = arg
+
+    in_bam_files = args
+    if not in_bam_files:
+        print "Error: no input BAM file specified."
+        print
+        usage()
+        sys.exit(2)
+    if len(in_bam_files) > 1:
+        print "Error: only one input BAM file must be given."
+        print
+        usage()
+        sys.exit(2)
+
+    all_present = True
+    for fn in in_bam_files:
+        if not os.path.isfile(fn):
+            print "Error: specified BAM file does not exist: '%s'" % fn
+            all_present = False
+    if not all_present:
+        print
+        usage()
+        sys.exit(2)
+
+    readlen2groups = iCLIPro.cmd_utils.parse_readlen_groups(readlen_groups)
+    if readlen2groups is None:
+        print "Error: specified read length groups cannot be parsed: \"%s\"" % (readlen_groups)
+        print
+        usage()
+        sys.exit(2)
+
+    print "Running iCLIP_bam_splitter using following parameters:"
+    print "    output_folder (-o) = '%s'" % output_folder
+    print "    minimum mapq (-q) = %s" % mapq_th
+    print "    read length to group(s) (-g):"
+    grp2readlens = {}
+    for readlen, grps in sorted(readlen2groups.iteritems()):
+        for grp in grps:
+            grp2readlens.setdefault(grp, []).append(readlen)
+    for grp, readlens in sorted(grp2readlens.iteritems()):
+        print "        %s: %s" % (grp, sorted(readlens))
+    print
+
+    for in_bam_file in in_bam_files:
+        print "Processing file:", in_bam_file
+        sys.stdout.flush()
+        iCLIPro.split_bam(in_bam_file, output_folder, readlen2groups, mapq_th=mapq_th)
+    print "DONE"
+
+if __name__ == "__main__":
+    main()
+

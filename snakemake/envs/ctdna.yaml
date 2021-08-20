@@ -1,0 +1,8 @@
+channels:
+ - bioconda
+ - conda-forge
+dependencies:
+ - afterqc=0.9.7
+ - samtools=1.9
+ - bwa=0.7.17
+ - varscan=2.4.3

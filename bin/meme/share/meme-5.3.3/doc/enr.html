@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>ENR - MEME Suite</title>
+    <link rel="shortcut icon" type="image/x-icon" href="images/memesuite_icon.ico">
+    <link rel="icon" type="image/png" href="images/memesuite_icon.png">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <script src="js/menu.js"></script>
+    <script src="js/shared-doc.js"></script>
+    <style>
+      div.example {
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="memesuitelogo">
+      <h1>The MEME Suite</h1>
+      <h2>Motif-based sequence analysis tools</h2>
+    </div>
+    <div class="prog_logo">
+      <h1>ENR</h1>
+      <h3>Motif ENRichment Analysis</h3>
+    </div>
+
+    <div style='display:inline' id='man_web_button'>
+      <p> <button onclick="toggle_man_display()">View Web Version</button> </p>
+    </div>
+
+    <div style='display:none' id='man_cmd_button'>
+      <p> <button onclick="toggle_man_display()">View Command-Line Version</button> </p>
+    </div>
+
+    <div style='display:inline' id='man_usage'>
+      <div class="usage">
+        <h3>Usage:</h3>
+        <code>enr [options] --p &lt;primary sequences&gt; [--m &lt;motifs&gt;]+</code>
+      </div>
+    </div>
+
+    <h3>Description</h3>
+    <div class="indent">
+      <span class="man blurb" data-id="enr"></span>
+    </div>
+
+    <!-- Command Line Version Doc -->
+    <div style='display:inline' id='man_cmd'>
+
+      <h3>Input</h3>
+      <div class="indent">
+        <span class='popt'><b>&lt;primary sequences&gt;</b></span>
+        <div class="indent">
+          <p>The name of a file containing the primary (positive) sequences in 
+          <a href="fasta-format.html">FASTA format</a>.  The file must contain
+	  at least 2 valid sequences or ENR will reject it.
+          Note that the command-line version of ENR does not attempt to detect the alphabet
+          from the primary sequences, so you should specify it with the
+          <span class="popt">--dna</span>, <span class="popt">--rna</span>,
+          <span class="popt">--protein</span> or <span class="popt">--alph</span>
+          options.
+        </div>
+        <span class='popt'><b>&lt;motifs&gt;</b></span>
+        <div class="indent">
+          <p>The name of a file containing motifs in 
+          <a href="meme-format.html">MEME format</a> that ENR will 
+	  test for enrichment in the primary sequence.  This argument
+          may be present more than once, allowing you to simultaneously
+	  analyze motifs in several motif files.
+      </div>
+
+      <h3>Output</h3>
+      <div class="indent">
+        <p>
+          ENR writes its output to standard output.  The output is in tab-separated values
+	  format (TSV).  The first line of the output contains the (tab-separated) names
+	  of the fields. The names and meanings of each of the fields are described in the table below. 
+        </p>
+        <table class="dark" style="width:100%" border=1>
+          <tr><th>field</th><th>name</th><th>contents</th><tr>
+          <tr><td>1</td><td>ID</td><td>The ID of the motif.</td><tr>
+          <tr><td>2</td><td>ALT_ID</td><td>The alternate ID of the motif (or blank).</td><tr>
+          <tr><td>3</td><td>POS_MATCHES</td><td>The number of primary sequences matching the motif with scores greater than or equal to the optimal score threshold.</td><tr>
+          <tr><td>4</td><td>NEG_MATCHES</td><td>The number of negative sequences matching the motif with scores greater than or equal to the optimal score threshold.</td><tr>
+          <tr><td>5</td><td>SCORE_THR</td><td>The match score threshold giving the optimal <i>p</i>-value.  This is the score threshold used by ENR
+		to determine the values of POS_MATCHES and NEG_MATCHES.</td><tr>
+          <tr><td>6</td><td>RATIO</td><td>The relative enrichment ratio of the motif in the primary vs. control sequences, defined as
+		(POS_MATCHES/NPOS) / (NEG_MATCHES/NNEG), where NPOS is the numbr of primary sequences in the input, and NNEG is the
+		number of negative sequences in the input. </td><tr>
+          <tr><td>7</td><td>PVALUE</td><td>The statistical signficance (<i>p</i>-value) of the motif's enrichment, according
+		to the chosen objective function.</td><tr>
+          <tr><td>8</td><td>LOG10_PVALUE</td><td>The base-10 logarithm of the <i>p</i>-value.</td><tr>
+        </table>
+      </div>
+      <br>
+
+      <h3>Options</h3>
+      <div class="indent">
+        <table class="options">
+          <thead>
+            <tr>
+              <th>Option</th>
+              <th>Parameter</th>
+              <th>Description</th>
+              <th>Default Behavior</th>
+            </tr>
+          </thead>
+
+<!--
+          <tbody>
+            <tr>
+              <th colspan="4">Output</th>
+            </tr>
+            <script>
+              wropt("all-o", {"ddash": true, "dir": "enr_out"});
+              wropt("all-oc", {"ddash": true, "dir": "enr_out"});
+            </script>
+            <tr>
+              <td class="popt">--text</td><td></td>
+              <td>Output in text format only to standard output.</td>
+              <td>The program behaves as if <code>--oc&nbsp;enr_out</code> had
+              been specified.</td>
+            </tr>
+          </tbody>
+-->
+
+	  <tbody>
+            <tr>
+              <th colspan="4">Objective Function</th>
+            </tr>
+            <tr>
+              <td class="popt">--objfun</td>
+              <td>
+                 <span class="popt">de</span>|&#8203;
+                 <span class="popt">cd</span>
+              </td>
+              <td>This option is used to select the objective function that
+                  ENR optimizes in searching for motifs.
+                <table class="dark">
+                  <tr>
+                    <th>Value</th><th>Name</th><th>Description</th>
+                  </tr>
+                  <tr>
+                    <td><span class="popt">de</span></td><td>Differential Enrichment</td>
+                    <td>This objective function scores motifs based on the
+                        enrichment of their sites in the primary sequences
+                        compared with the control sequences.
+                        ENR estimates motif enrichment using Fisher's
+			exact test if the primary and control sequences have the
+			same average length (within 0.01%), otherwise it uses the Binomial test.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><span class="popt">cd</span></td><td>Central Distance</td>
+                    <td>This objective function scores motifs based on their
+                        tendency to occur near the center of the primary
+                        sequences, which must all be of the same length.
+			No set of control sequences is allowed, and
+                        the primary sequences should include adequate flanking
+                        region around the expected motif sites&mdash;e.g., use sequences
+                        of 500bp for ChIP-seq.  ENR estimates the tendency of a motif
+			to occur near the centers of primary sequences
+                        using the cumulative Bates distribution applied to the 
+			mean distance of the best site from the sequence center.
+                    </td>
+                  </tr>
+                </table>
+              </td>
+              <td>ENR uses the Differential Enrichment (de) function.</td>
+	  </tbody>
+
+          <tbody>
+            <tr>
+              <th colspan="4">Control Sequences and Hold-out Set</th>
+            </tr>
+            <tr>
+              <td class="popt">--n</td>
+              <td><span class="pdat">control sequences</span></td>
+              <td>The name of a file containing control (negative) sequences in 
+		  <a href="fasta-format.html">FASTA format</a>.
+		  The control sequences must be in the same sequence alphabet as the primary sequences.
+		  If the average length of the control sequences is longer than that of
+		  the primary sequences, ENR trims the control sequences so that both
+		  sets have the same average length.
+              </td>
+              <td>If you do not provide control sequences, ENR creates them by shuffling a copy
+		  of each primary sequence, preserving the frequencies of words of length <span class="pdat">k</span>
+		  (see next option).  Shuffling also preserves the positions of non-core
+		  (e.g., ambiguous) characters in each sequence to avoid artifacts.
+              <td>
+            </tr>
+            <tr>
+              <td class="popt">--kmer</td>
+	      <td><span class="pdat">k</span></td>
+              <td>Preserve the frequencies of words (k-mers) of this size when shuffling primary sequences
+		  to create control sequences. <span class="pdat">k</span> 
+		  must be in the range [1,..,6].  ENR also estimates a background
+		  model of order <span class="pdat">k</span>-1 from the primary (positive) 
+	          sequences for use in log-likelihood scoring of motif sites.
+              <td>ENR preserves the frequencies of words of length 3 (DNA and RNA),
+		  and 1 (Protein and Custom alphabets), and constructs background models of 
+                  order 2 (DNA and RNA), and order 0 (Protein and Custom alphabets).
+              <td>
+            </tr>
+            <tr>
+              <td class="popt">--hofract</td>
+              <td><span class="pdat">hofract</span></td>
+              <td>The fraction of the primary sequences that ENR will randomly select
+		  and hold out to simulate exactly how STREME works.  ENR will therefor
+                  report the same statistical significance for motifs found by STREME
+		  as reported by STREME.  <b>Note:</b> Set this option to zero if you want to measure
+		  the statistical significance of your motifs in the complete set of
+		  input sequences.
+              </td>
+              <td>ENR sets <span class="pdat">hofract</span> to 0.1 (10%) of the primary sequences.
+              </td>
+            </tr>
+            <tr>
+              <td class="popt">-seed</td>
+              <td><span class="pdat">seed</span></td>
+	      <td>Random seed for shuffling and sampling the hold-out set sequences (see above).</td>
+	      <td>ENR uses a random seed of 0.</td>
+            </tr>
+          </tbody>
+
+          <tbody>
+            <tr>
+              <th colspan="4">Alphabet</th>
+            </tr>
+            <script>
+              wropt("all-stdalph", {"ddash": true, "enr": true, "dna": true});
+              wropt("all-stdalph", {"ddash": true, "enr": true, "rna": true});
+              wropt("all-stdalph", {"ddash": true, "enr": true, "protein": true});
+              wropt("all-alph", {"ddash": true, "getsize": false, "ambig-unknown": true});
+            </script>
+          </tbody>
+
+          <tbody>
+            <tr>
+              <th colspan="4">Motif Scoring and Selection</th>
+            </tr>
+            <script>
+              wropt("all-bg", {"ddash": true, "bfile": true, "centrimo": true, "sequences": true});
+              wropt("all-pseudo", {"ddash": true, "legacy": true});
+              wropt("all-inc", {"inc": true, "ddash": true, "centrimo": true});
+              wropt("all-inc", {"inc": false, "ddash": true, "centrimo": true});
+            </script>
+          </tbody>
+
+          <tbody>
+            <tr>
+              <th colspan="4">Misc</th>
+	    <script>
+	      wropt("all-help", {"ddash": true});
+	      wropt("all-version", {"ddash": true});
+	    </script>
+            <tr>
+              <td class="popt">--verbosity</td><td>1|2|3|4|5</td>
+              <td>A number that regulates the verbosity level of the output
+		information messages. If set to 1 (quiet) then ENR will only
+		output error messages, whereas the other extreme 5 (dump)
+		outputs lots of information intended for debugging.
+              </td>
+              <td>The verbosity level is set to 2 (normal).</td>
+            </tr>
+          </tbody>
+
+        </table>
+      </div>
+      <br>
+
+      <h3>ENR algorithm overview</h3>
+      <div class="indent">
+        <p>ENR evaluates each motif in the motif file(s) for enrichment in
+	  the primary sequences.
+        </p>
+	<ol>
+	  <li><b>Suffix Tree Creation.</b>
+	    <p>
+	      ENR builds a single suffix tree that includes both
+	      the primary and control sequences (but not the hold-out set
+	      sequences).
+	    </p>
+	  </li>
+	  <li><b>Motif Conversion.</b>
+	    <p>
+	      ENR converts each motif from a frequency matrix to a log-odds
+	      score matrix.  By default, STREME creates a background
+	      model from the control sequences, but you can provide
+	      a different background model if you wish.
+	    </p>
+	  </li>
+	  <li><b>Motif Significance Computation.</b>
+	    <p>
+	      ENR computes the unbiased statistical significance of the of
+	      the motif by using the motif and the optimal discriminative score threshold (based on the
+	      primary and control sequences) to classify the hold-out set sequences,
+	      and then applying the statistical test (Fisher's exact test, Binomial test,
+	      or the cumulative Bates distribution) to the classification.
+	      Classification is based on the best match to the motif in each
+	      sequence (on either strand when the alphabet is complementable).
+	    </p>
+	  </li> 
+	</ol>
+      </div>
+
+    </div>
+
+    <h3 id="citing">Citing</h3>
+    <div class=indent>
+      If you use ENR in your research, please cite the following paper:<br />
+      <div class="citation">
+	FIXME.
+      </div>
+    </div>
+
+    <script src="js/manual.js"></script>
+
+  </body>
+</html>

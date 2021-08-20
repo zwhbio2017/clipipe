@@ -1,0 +1,695 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>STREME Results</title>
+    <script src="streme_data.js"></script>
+    <script src="constants.js"></script>
+    <script src="utilities.js"></script>
+    <script src="motif_logo_template.js"></script>
+    <script src="motif_logo.js"></script>
+    <script src="streme_template.js"></script>
+    <link rel="stylesheet" type="text/css" href="meme.css">
+    <link rel="stylesheet" type="text/css" href="streme_template.css">
+  </head>
+  <body data-scrollpad="true">
+    <!--  -->
+    <div id="grey_out_page" class="grey_background" style="display:none;">
+    </div>
+
+    <!-- Help popups -->
+    <div class="pop_content" id="pop_">
+      <p>Help poup.</p>
+      <div class="pop_close">[<a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+
+    <div class="pop_content" id="pop_results_txt">
+      <p>STREME results in plain text format.</p>
+      <div style="float:right; bottom:0px;">[
+        <a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+    <div class="pop_content" id="pop_results_xml">
+      <p>STREME results in XML format.</p>
+      <div style="float:right; bottom:0px;">[
+        <a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+
+    <div class="pop_content" id="pop_motifs_word">
+      <p>
+        The name of the motif uses the IUPAC codes for nucleotides or proteins.
+	Letters representing multiple nucleotides are used in nucleotide motif
+	positions where several nucleotides are favored.  
+      </p>
+      <p>The name of the motif is &lt;index&gt;-&lt;consensus&gt;, 
+        where &lt;index&gt; is the order in which the motif was found, 
+        and &lt;consensus&gt; is an approximation of the motif
+        by an IUPAC sequence.
+      </p>
+      <p>
+        <a id="doc_alphabets_url" href="#">
+        Read more about the MEME Suite's use of the IUPAC alphabets.
+        </a>
+        <script>$("doc_alphabets_url").href = site_url + "/doc/alphabets.html";</script>
+      </p>
+      <div class="pop_close">[<a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+    <div class="pop_content" id="pop_motifs_logo">
+      <p>The logo of the motif.  
+        The rules for construction logos are given in
+	the Description section of the documentation for the MEME Suite utility
+	<a id="doc_ceqlogo_url" href="#">ceqlogo</a>.
+      </p>
+      <script>$("doc_ceqlogo_url").href = site_url + "/doc/ceqlogo.html";</script>
+      <div class="pop_close">[<a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+    <div class="pop_content" id="pop_motifs_rc_logo">
+      <p>The logo of the reverse complement motif.
+        The rules for construction logos are given in
+	the Description section of the documentation for the MEME Suite utility
+	<a id="doc_ceqlogo_url2" href="#">ceqlogo</a>.
+      </p>
+      <script>$("doc_ceqlogo_url2").href = site_url + "/doc/ceqlogo.html";</script>
+      <div class="pop_close">[<a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+    <div class="pop_content" id="pop_more">
+      <p>Show detailed information about the motif.</p>
+      <div class="pop_close">[<a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+    <div class="pop_content" id="pop_submit_dl">
+      <p>Submit your motif to another MEME Suite program (see list below), or Download your motif
+      as a probability matrix, count matrix or MEME formatted motif, or download
+      a Sequence Logo for your motif.</p>
+      <h5>Supported Programs</h5>
+      <dl>
+        <dt>Tomtom</dt>
+        <dd>Tomtom is a tool for searching for similar known motifs. 
+          </dd>
+        <dt>MAST</dt>
+        <dd>MAST is a tool for searching biological sequence databases for 
+          sequences that contain one or more of a group of known motifs.
+          </dd>
+        <dt>FIMO</dt>
+        <dd>FIMO is a tool for searching biological sequence databases for 
+          sequences that contain one or more known motifs.
+          </dd>
+        <dt>GOMo</dt>
+        <dd>GOMo is a tool for identifying possible roles (Gene Ontology 
+          terms) for DNA binding motifs.
+          </dd>
+        <dt>SpaMo</dt>
+        <dd>SpaMo is a tool for inferring possible transcription factor
+          complexes by finding motifs with enriched spacings.
+          </dd>
+      </dl>
+      <div class="pop_close">[<a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+    <div class="pop_content" id="pop_motif_sites">
+      <p>The number of positive sequences matching the motif.</p>
+      <div class="pop_close">[<a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+    <div class="pop_content" id="pop_motif_train_pos_ratio">
+      <p>The number of training set positive sequences matching the motif / the number of training set positive sequences.</p>
+      <p>Note these counts are made after erasing sites that match previously
+        found motifs.</p>
+      <div class="pop_close">[<a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+    <div class="pop_content" id="pop_motif_train_positives">
+      <p>The number of training set positive sequences matching the motif.</p>
+      <p>Note these counts are made after erasing sites that match previously
+        found motifs.</p>
+      <div class="pop_close">[<a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+    <div class="pop_content" id="pop_motif_train_negatives">
+      <p>The number of training set negative sequences matching the motif / the number of training set negative sequences.</p>
+      <p>Note these counts are made after erasing sites that match previously
+        found motifs.</p>
+      <div class="pop_close">[<a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+    <div class="pop_content" id="pop_motif_test_pos_ratio">
+      <p>The number test set positive sequences matching the motif / the number of test set positive sequences.</p>
+      <p>Note these counts are made after erasing sites that match previously
+        found motifs.</p>
+      <div class="pop_close">[<a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+    <div class="pop_content" id="pop_motif_test_positives">
+      <p>The number of test set positive sequences matching the motif.</p>
+      <p>Note these counts are made after erasing sites that match previously
+        found motifs.</p>
+      <div class="pop_close">[<a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+    <div class="pop_content" id="pop_motif_test_negatives">
+      <p>The number of test set negative sequences matching the motif / the number of test set negative  sequences.</p>
+      <p>Note these counts are made after erasing sites that match previously
+        found motifs.</p>
+      <div class="pop_close">[<a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+    <div class="pop_content" id="pop_motif_train_dtc">
+      <p>The mean distance from the center of the best match to the sequence center,
+        averaged over all training set sequences with a match.</p>
+      <div class="pop_close">[<a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+    <div class="pop_content" id="pop_motif_test_dtc">
+      <p>The mean distance from the center of the best match to the sequence center,
+        averaged over all test set sequences with a match.</p>
+      <div class="pop_close">[<a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+    <div class="pop_content" id="pop_motif_train_pvalue">
+      <p>The Score is the unadjusted <i>p</i>-value of the motif based on the appropriate test
+	applied to the training set sequences.
+        Since the Score is not adjusted for multiple tests, it <b>cannot</b> 
+        be used to determine the statistical significance of the motif.
+        The Score is used by STREME to select the best motif at each iteration.
+      </p>
+      <p>For determining if a motif is statistically significant, you should use the
+        value in the P-value column.  If there is no P-value column, that
+	means that the positive hold-out set would have been too small (fewer than 5 sequences).
+        For very small sequence sets, it is not practical for STREME to compute an accurate <i>p</i>-value.  
+        In that case, you can determine if your motif is significant by running STREME twenty or more
+	times on shuffled versions of your positive dataset,
+        and seeing if the Score is always <b>larger</b> than the Score using the original sequences.
+        You can make shuffled sequence datasets using the MEME Suite command-line utility 
+        <a id="doc_fasta-shuffle-letters_url" href="#">fasta-shuffle-letters</a>) if you
+        have installed the MEME Suite on your own computer.
+      </p>
+      <p>The statistical test used in computing the Score is either the Fisher Exact Test,
+	the Binomial Test, or the Cumulative Bates distribution.  (See <a href="#inputs_sec">Inputs and Settings</a> 
+        for the particular test being used.)  The Fisher Exact Test and the Binomial Test both
+        measure the enrichment of the motif in the positive test sequences compared to the
+        the negative test sequences. 
+        (The Binomial Test is used when the positive and negative sequences have different average lengths.) 
+        The Cumulative Bates distribution measures the tendency
+        of motif to be near the center of the sequences.</p>
+      <div class="pop_close">[<a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+    <script>$("doc_fasta-shuffle-letters_url").href = site_url + "/doc/fasta-shuffle-letters.html";</script>
+    <div class="pop_content" id="pop_motif_test_pvalue">
+      <p>The <i>p</i>-value of the motif based on applying the appropriate statistical test
+        to the test set sequences.  The <i>p</i>-value is an <b>accurate estimate</b> of
+	the statistical significance of the motif as long as the length
+	distributions of the positive and negative sequences are the same.</p>
+      <p>The statistical test used in computing the <i>p</i>-value is either the Fisher Exact Test,
+	the Binomial Test, or the Cumulative Bates distribution.  (See <a href="#inputs_sec">Inputs and Settings</a> 
+        at the bottom of this document for the particular test being used.)  
+        The Fisher Exact Test and the Binomial Test both
+        measure the enrichment of the motif in the positive test sequences compared to the
+        the negative test sequences. 
+        (The Binomial Test is used when the positive and negative sequences have different average lengths.) 
+        The Cumulative Bates distribution measures the tendency
+        of motif to be near the center of the sequences.</p>
+      <div class="pop_close">[<a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+    <div class="pop_content" id="pop_motif_match_threshold">
+      <p>The score threshold for determining if a potential site is a match
+	to the motif.  The same threshold is applied when determining matches in
+	the training and test sequences.  The threshold is in bits.
+      </p>
+      <p>The match score of a position in a sequence is determined by converting
+	the motif to a base-2 log-odds matrix using the formula log2(prob[a][i]/background[a]).
+        Here, prob[a][i] is the probability of the letter 'a' at position 'i' of the motif,
+	and background[a] is the probability of the letter 'a' according to the background.
+      </p>
+      <div class="pop_close">[<a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+    <div class="pop_content" id="pop_pos_seq_source">
+      <p>The name of the file containing the (positive) sequences in which STREME will search for
+        enriched motifs.
+      </p>
+      <div class="pop_close">[<a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+    <div class="pop_content" id="pop_neg_seq_source">
+      <p>The name of the file containing the negative (e.g., control)
+      sequences relative to which STREME will look for motifs enriched
+      in the positive sequences, or the words "n-Order Shuffled Sequences" if
+      no negative sequence file was given and the negative sequences are 
+      shuffled copies of the positive sequences.<br><br>
+      0-order shuffling preserves 1-mer frequencies (i.e., the letter frequencies), 
+      1-order shuffling preserves 2-mer frequencies, etc.</p>
+      <div class="pop_close">[<a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+    <div class="pop_content" id="pop_seq_alph">
+      <p>The name of the alphabet of the sequences.</p>
+      <div class="pop_close">[<a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+    <div class="pop_content" id="pop_seq_count">
+      <p>The number of sequences.</p>
+      <div class="pop_close">[<a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+
+    <div class="pop_content" id="pop_alph_name">
+      <p>The name of the alphabet symbol.</p>
+      <div class="pop_close">[<a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+
+    <div class="pop_content" id="pop_alph_freqs">
+      <p>The frequency of the alphabet symbol in the positive sequences.</p>
+      <div class="pop_close">[<a href="javascript:help_popup()">close</a> ]</div>
+    </div>
+
+    <!-- templates -->
+
+    <div class="template box expanded_motif" id="tmpl_motif_expanded">
+      <div>
+        <span class="tvar_logo"></span>
+        <span class="tvar_rclogo"></span>
+      </div>
+      <h4>Details</h4>
+      <table class="details">
+        <thead>
+          <tr>
+            <th class="match_count de_col">Train Positives&nbsp;<div class="help" data-topic="pop_motif_train_pos_ratio"></div></th>
+            <th class="match_count cd_col">Train Positives&nbsp;<div class="help" data-topic="pop_motif_train_positives"></div></th>
+            <th class="match_count de_col">Train Negatives&nbsp;<div class="help" data-topic="pop_motif_train_negatives"></div></th>
+            <th class="match_count cd_col">Train DTC&nbsp;<div class="help" data-topic="pop_motif_train_dtc"></div></th>
+            <th class="motif_score">Score&nbsp;<div class="help" data-topic="pop_motif_train_pvalue"></div></th>
+	    <th class="match_count de_col test_seq_col">Test Positives&nbsp;<div class="help" data-topic="pop_motif_test_pos_ratio"></div></th>
+	    <th class="match_count cd_col test_seq_col">Test Positives&nbsp;<div class="help" data-topic="pop_motif_test_positives"></div></th>
+	    <th class="match_count de_col test_seq_col">Test Negatives&nbsp;<div class="help" data-topic="pop_motif_test_negatives"></div></th>
+            <th class="motif_dtc cd_col test_seq_col">Test DTC&nbsp;<div class="help" data-topic="pop_motif_test_dtc"></div></th>
+	    <th class="motif_pvalue test_seq_col">P-value&nbsp;<div class="help" data-topic="pop_motif_test_pvalue"></div></th>
+	    <th class="match_threshold">Match Threshold&nbsp;<div class="help" data-topic="pop_motif_match_threshold"></div></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="match_count de_col">
+              <span class="tvar_train_p"></span> / <span class="tvar_train_p_total"></span>
+              (<span class="tvar_train_pos_ratio"></span>)
+            </td>
+            <td class="match_count de_col">
+              <span class="tvar_train_n"></span> / <span class="tvar_train_n_total"></span>
+              (<span class="tvar_train_neg_ratio"></span>)
+            </td>
+            <td class="match_count cd_col">
+              <span class="tvar_train_p_cd"></span>
+            </td>
+            <td class="motif_dtc cd_col">
+              <span class="tvar_train_dtc"></span>
+            </td>
+            <td class="tvar_train_pvalue motif_score"></td>
+
+	    <td class="match_count de_col test_seq_col">
+	      <span class="tvar_test_p"></span> / <span class="tvar_test_p_total"></span>
+	      (<span class="tvar_test_pos_ratio"></span>)
+	    </td>
+	    <td class="match_count de_col test_seq_col">
+	      <span class="tvar_test_n"></span> / <span class="tvar_test_n_total"></span>
+	      (<span class="tvar_test_neg_ratio"></span>)
+	    </td>
+            <td class="match_count cd_col test_seq_col">
+              <span class="tvar_test_p_cd"></span>
+            </td>
+            <td class="motif_dtc cd_col test_seq_col">
+              <span class="tvar_test_dtc"></span> 
+            </td>
+	    <td class="tvar_test_pvalue motif_pvalue test_seq_col"></td>
+	    <td class="tvar_match_threshold match_threshold"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="popup_wrapper">
+      <div class="popup" style="display:none; top: -150px;" id="download">
+        <div>
+          <div style="float:right; ">
+            <div id="outpop_close" class="close" tabindex="0">x</div>
+          </div>
+          <h2 class="mainh" style="margin:0; padding:0;">Submit or Download</h2>
+          <div style="clear:both"></div>
+        </div>
+          <div style="height:100px">
+            <div style="float:right; width: 30px;">
+              <div id="outpop_prev" class="navarrow" tabindex="0">
+                <span class="inactive">&#8679;</span><span class="active">&#11014;</span>
+              </div>
+              <div id="outpop_num" class="navnum"></div>
+              <div id="outpop_next" class="navarrow" tabindex="0">
+                <span class="inactive">&#8681;</span><span class="active">&#11015;</span>
+              </div>
+            </div>
+            <div id="logo_box" style="height: 100px; margin-right: 40px;">
+              <canvas id="outpop_logo" height="100" width="250"></canvas>
+              <canvas id="outpop_logo_rc" height="100" width="250"></canvas>
+            </div>
+          </div>
+          <div>
+            <!-- tabs start -->
+            <div class="tabArea top">
+              <span id="outpop_tab_1" class="tab">Submit Motif</span><span
+                id="outpop_tab_2" class="tab middle">Download Motif</span><span 
+                id="outpop_tab_3" class="tab middle">Download Logo</span>
+            </div>
+            <div class="tabMain top">
+              <!-- Submit to another program -->
+              <div id="outpop_pnl_1">
+                <h4 class="compact">Submit to program</h4>
+                <table id="programs" class="programs">
+                  <tr>
+                    <td><input type="radio" name="program" value="tomtom" id="submit_tomtom"></td>
+                    <td><label for="submit_tomtom">Tomtom</label></td>
+                    <td><label for="submit_tomtom">Find similar motifs in
+                        published libraries or a library you supply.</label></td>
+                  </tr>
+                  <tr>
+                    <td><input type="radio" name="program" value="fimo" id="submit_fimo"></td>
+                    <td><label for="submit_fimo">FIMO</label></td>
+                    <td><label for="submit_fimo">Find motif occurrences in
+                        sequence data.</label></td>
+                  </tr>
+                  <tr>
+                    <td><input type="radio" name="program" value="mast" id="submit_mast"></td>
+                    <td><label for="submit_mast">MAST</label></td>
+                    <td><label for="submit_mast">Rank sequences by affinity to
+                        groups of motifs.</label></td>
+                  </tr>
+                  <tr class="dna_only">
+                    <td><input type="radio" name="program" value="gomo" id="submit_gomo"></td>
+                    <td><label for="submit_gomo">GOMo</label></td>
+                    <td><label for="submit_gomo">Identify possible roles (Gene
+                        Ontology terms) for motifs.</label></td>
+                  </tr>
+                  <tr class="dna_only">
+                    <td><input type="radio" name="program" value="spamo" id="submit_spamo"></td>
+                    <td><label for="submit_spamo">SpaMo</label></td>
+                    <td><label for="submit_spamo">Find other motifs that are
+                        enriched at specific close spacings which might imply the existence of a complex.</label></td>
+                  </tr>
+                </table>
+              </div>
+              <!-- download text format  -->
+              <div id="outpop_pnl_2">
+                <div>
+                  <label for="text_format">Format:</label>
+                  <select id="text_format">
+                    <option value="0">Count Matrix</option>
+                    <option value="1">Probability Matrix</option>
+                    <option value="2">Minimal MEME</option>
+                  </select>
+                </div>
+                <textarea id="outpop_text" name="content"
+                  style="width:99%; white-space: pre; word-wrap: normal; overflow-x: scroll;" 
+                  rows="8" readonly="readonly" wrap="off"></textarea>
+                <a id="outpop_text_dl" download="meme.txt" href=""></a>
+              </div>
+              <!-- download logo format -->
+              <div id="outpop_pnl_3">
+                <form id="logo_form" method="post" action="">
+                  <script>$("logo_form").action = site_url + "/utilities/generate_logo";</script>
+                  <input type="hidden" name="program" value="STREME"/>
+                  <input type="hidden" id="logo_motifs" name="motifs" value=""/>
+                  <table>
+                    <tr>
+                      <td><label for="logo_format">Format:</label></td>
+                      <td>
+                        <select id="logo_format" name="png">
+                          <option value="1">PNG (for web)</option>
+                          <option value="0">EPS (for publication)</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><label for="logo_rc">Orientation:</label></td>
+                      <td>
+                        <select id="logo_rc" name="rc1">
+                          <option value="0">Normal</option>
+                          <option value="1" id="logo_rc_option">Reverse Complement</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><label for="logo_ssc">Small Sample Correction:</label></td>
+                      <td>
+                        <input type="hidden" id="logo_err" name="errbars" value="0"/>
+                        <select id="logo_ssc" name="ssc">
+                          <option value="0">Off</option>
+                          <option value="1">On</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><label for="logo_width">Width:</label></td>
+                      <td>
+                        <input type="text" id="logo_width" size="4" placeholder="default" name="width"/>&nbsp;cm
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><label for="logo_height">Height:</label></td>
+                      <td>
+                        <input type="text" id="logo_height" size="4" placeholder="default" name="height"/>&nbsp;cm
+                      </td>
+                    </tr>
+                  </table>
+                </form>
+              </div>
+              <!-- Buttons -->
+              <div>
+                <div style="float:left;">
+                  <input type="button" id="outpop_do" value="Submit" />
+                </div>
+                <div style="float:right;">
+                  <input id="outpop_cancel" type="button" value="Cancel" />
+                </div>
+                <div style="clear:both;"></div>
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page starts here -->
+    <div id="top" class="pad1">
+      <div class="prog_logo big">
+        <img src="streme_icon.png" alt="STREME Logo"/>
+        <h1>STREME </h1>
+        <h2>Sensitive, Thorough, Rapid, Enriched Motif Elicitation</h2>
+      </div>
+      <p class="spaced">
+        For further information on how to interpret these results please access
+        <a href="https://meme-suite.org/meme/doc/streme.html">https://meme-suite.org/meme/doc/streme.html</a>. <br />
+        To get a copy of the MEME software please access 
+        <a href="https://meme-suite.org">https://meme-suite.org</a>.
+      </p>
+      <p>
+        If you use STREME in your research please cite the following paper:<br />
+        <span class="citation">
+          Timothy L. Bailey,
+          &quot;STREME: Accurate and versatile sequence motif discovery&quot;,
+          <i>bioRxiv</i>, <b>preprint</b>, 2020.
+        </span>
+      </p>
+    </div>
+    <!-- navigation -->
+    <div class="pad2">
+      <a class="jump" href="#motifs_sec">Discovered Motifs</a>
+      &nbsp;&nbsp;|&nbsp;&nbsp;
+      <a class="jump" href="#inputs_sec">Inputs &amp; Settings</a>
+      &nbsp;&nbsp;|&nbsp;&nbsp;
+      <a class="jump" href="#info_sec">Program Information</a>
+      &nbsp;&nbsp;|&nbsp;&nbsp;
+      <a class="jump" href="streme.txt">Results in Text Format</a>&nbsp;<span id="results_txt_help"></span>
+      &nbsp;&nbsp;|&nbsp;&nbsp;
+      <a class="jump" href="streme.xml">Results in XML Format</a>&nbsp;<span id="results_xml_help"></span>
+      <script>
+        make_help_button($("results_txt_help"), "pop_results_txt");
+        make_help_button($("results_xml_help"), "pop_results_xml");
+      </script>
+    </div>
+    <!-- alert the user when their browser is not up to the task -->
+    <noscript><h1 style="color:red">Javascript is required to view these results!</h1></noscript>
+    <h1 id="html5_warning" style="color:red; display:none;">Your browser does not support canvas!</h1>
+    <script>
+      if (!window.HTMLCanvasElement) $("html5_warning").style.display = "block";
+    </script>
+    <!-- description -->
+    <div id="description_section" style="display:none">
+      <div id="description" class="header">
+        <h2>Description</h2>
+      </div>
+      <div id="description_text" class="box">
+      </div>
+    </div>
+    <script>
+      if (data.description) {
+        $("description_text").innerHTML = "";
+        $("description_text").appendChild(make_description(data.description));
+        $("description_section").style.display = "block";
+      }
+    </script>
+    <!-- motifs -->
+    <div id="motifs_sec" class="header">
+      <h2>Discovered Motifs</h2>
+      <span><a href="#inputs_sec">Next</a>&nbsp;<a href="#">Top</a></span>
+    </div>
+    <div id="motifs" class="box">
+      <p>No motifs were discovered!</p>
+    </div>
+    <script>make_motifs();</script>
+    <!-- inputs and settings -->
+    <div id="inputs_sec" class="header">
+      <h2>Inputs &amp; Settings</h2>
+      <span><a href="#motifs_sec">Previous</a>&nbsp;<a href="#info_sec">Next</a>&nbsp;<a href="#">Top</a></span>
+    </div>
+    <div class="box">
+      <h4>Positive Sequences</h4>
+      <table id="seq_info" class="inputs">
+        <tr><th>Source&nbsp;<div class="help" data-topic="pop_pos_seq_source"></div></th>
+          <th>Alphabet&nbsp;<div class="help" data-topic="pop_seq_alph"></div></th>
+          <th>Sequence Count&nbsp;<div class="help" data-topic="pop_seq_count"></div></th>
+        </tr>
+        <tr>
+          <td id="ins_pos_seq_source"></td>
+          <td id="ins_pos_seq_alphabet"></td>
+          <td id="ins_pos_seq_count"></td>
+        </tr>
+      </table>
+      <script>
+      {
+        $("ins_pos_seq_source").innerHTML = data.train_positives.file;
+        $("ins_pos_seq_alphabet").innerHTML = streme_alphabet.get_alphabet_name();
+        $("ins_pos_seq_count").innerHTML = data.train_positives.count + data.test_positives.count;
+      }
+      </script>
+      <div id="opt_neg_seqs">
+	<h4>Negative Sequences</h4>
+	<table id="seq_info" class="inputs">
+	  <tr><th>Source&nbsp;<div class="help" data-topic="pop_neg_seq_source"></div></th>
+	    <th>Sequence Count&nbsp;<div class="help" data-topic="pop_seq_count"></div></th>
+	  </tr>
+	  <tr>
+	    <td id="ins_neg_seq_source"></td>
+	    <td id="ins_neg_seq_count"></td>
+	  </tr>
+	</table>
+	<script>
+	{
+	  if (data.train_negatives.from == "shuffled") {
+	    $("ins_neg_seq_source").innerHTML = data.options.kmer-1 + "-Order Shuffled Positive Sequences";
+            $("opt_neg_seqs").className = "have_neg_seqs";
+	  } else if (data.train_negatives.from == "file") {
+	    $("ins_neg_seq_source").innerHTML = data.train_negatives.file;
+            $("opt_neg_seqs").className = "have_neg_seqs";
+	  } else {
+            $("opt_neg_seqs").className = "no_neg_seqs";
+          }
+	  $("ins_neg_seq_count").innerHTML = data.train_negatives.count + data.test_negatives.count;
+	}
+	</script>
+      </div>
+      <h4>Background</h4>
+      <span id="alpha_bg"></span>
+      <script>
+      {
+        $("alpha_bg").appendChild(make_alpha_bg(streme_alphabet, data.background.freqs));
+      }
+      </script>
+      <h4>Other Settings</h4>
+      <table id="tbl_settings" class="inputs hide_advanced">
+        <tr>
+          <th>Strand Handling</th>
+          <td id="opt_strand">
+            <span class="strand_none">This alphabet only has one strand.</span>
+            <span class="strand_given">Only the given strand is processed.</span>
+            <span class="strand_both">Both the given and reverse complement strands are processed.</span>
+          </td>
+        </tr>
+        <tr><th>Objective Function</th><td id="opt_objfun"></td></tr>
+        <tr><th>Statistical Test</th><td id="opt_test"></td></tr>
+        <tr class="experimental"><th>Motif Selection Criterion</th><td id="opt_useer"></td></tr>
+        <tr><th>Minimum Motif Width</th><td id="opt_minw"></td></tr>
+        <tr><th>Maximum Motif Width</th><td id="opt_maxw"></td></tr>
+        <tr><th>Background Model</th><td id="opt_background"></td></tr>
+        <tr id="shuffling"><th>Sequence Shuffling</th><td id="opt_shuffling"></td></tr>
+        <tr><th>Test Set</th><td id="opt_hofract"></td></tr>
+        <tr><th>Word Evaluation</th><td id="opt_neval"></td></tr>
+        <tr><th>Seed Refinement</th><td id="opt_nref"></td></tr>
+        <tr><th>Refinement Iterations</th><td id="opt_niter"></td></tr>
+        <tr class="experimental"><th>Minimum Score</th><td id="opt_minscore"></td></tr>
+        <tr class="experimental"><th>Refinement Match Subsets</th><td id="opt_nsubsets"></td></tr>
+        <tr class="experimental"><th>Minimum Palindrome Ratio</th><td id="opt_min_pal_ratio"></td></tr>
+        <tr class="experimental"><th>Maximum Palindrome Edit Distance</th><td id="opt_max_pal_ed"></td></tr>
+        <tr class="experimental"><th>Print Candidate Motifs?</th><td id="opt_cand"></td></tr>
+        <tr><th>Random Number Seed</th><td id="opt_seed"></td></tr>
+        <tr><th>Total Length</th><td id="opt_totallength"></td></tr>
+        <tr><th>Maximum Motif P-value</th><td id="opt_stop_pvalue"></td></tr>
+        <tr><th>Maximum Motifs to Find</th><td id="opt_stop_nmotifs"></td></tr>
+        <tr><th>Maximum Run Time</th><td id="opt_stop_time"></td></tr>
+      </table>
+      <script>
+      {
+        // Don't display experimental options if not compiled with EXP defined.
+        if (!data.options.experimental) {
+          var x = document.getElementsByClassName("experimental");
+          var i;
+	  for (i = 0; i < x.length; i++) {
+	    x[i].style.display="none";
+	  } 
+        }
+        // Don't display shuffling line if not relevant.
+        if (data.train_negatives.from != "shuffled") {
+          var element=document.getElementById("shuffling");
+          element.style.display="none";
+        }
+        $("opt_strand").className = (streme_alphabet.has_complement() ? (data.options.strands == "both" ? "both" : "given") : "none");
+        $("opt_objfun").innerHTML = data.options.objfun;
+        $("opt_test").innerHTML = data.options.test;
+        $("opt_useer").innerHTML = data.options.useer ? "Output (significant) motif with the highest enrichment ratio on the training set each round." : 
+          "Output motif with the lowest p-value on the training set each round.";
+        $("opt_minw").innerHTML = data.options.minw;
+        $("opt_maxw").innerHTML = data.options.maxw;
+        $("opt_background").innerHTML = (data.options.kmer-1) + "-order Markov model."
+        $("opt_shuffling").innerHTML = data.options.objfun == "Central Distance" ? "None." : "Negative sequences are positives shuffled preserving " + data.options.kmer + "-mer frequencies.";
+        $("opt_hofract").innerHTML = (data.options.hofract > 0 && data.test_positives.count > 0) ? 100*data.options.hofract + "% of the input sequences were randomly assigned to the test set." : "There is no test set." ;
+        $("opt_neval").innerHTML = "Up to " + data.options.neval + " words of each width from " + data.options.minw + " to " + data.options.maxw + " were evaluated to find seeds.";
+        $("opt_nref").innerHTML = "Up to " + data.options.nref + " seeds of each width from " + data.options.minw + " to " + data.options.maxw + " were further refined.";
+        $("opt_niter").innerHTML = "Up to " + data.options.niter + " iterations were allowed when refining a seed.";
+        $("opt_minscore").innerHTML = 
+          data.options.minscore < 0 ? "N/A" : "Match scoring was truncated if a match longer than " + data.options.ignore_depth + " scored less than " + data.options.minscore + ".";
+        $("opt_nsubsets").innerHTML = 
+          data.options.nsubsets < 0 ? "N/A" : 
+            (data.options.nsubsets == 1 ? 
+              "A new motif was created from the optimal set of matches each refinement iteration." :
+              "New motifs were created from " + data.options.nsubsets + " nested subsets of high-scoring matches.");
+        $("opt_min_pal_ratio").innerHTML = data.options.min_pal_ratio;
+        $("opt_max_pal_ed").innerHTML = data.options.max_pal_ed;
+        $("opt_cand").innerHTML = data.options.cand ? "Yes.  Candidate motifs are printed to TEXT output only." : "No."
+        $("opt_seed").innerHTML = data.options.seed;
+        $("opt_totallength").innerHTML = (data.options.totallength == 0) ? 
+          "The total length of the sequence set(s) was not limited." : 
+          "The total length of each sequence set was limited to " + data.options.totallength.toPrecision(3) + ".";
+        $("opt_stop_pvalue").innerHTML = typeof(data.options.stop.pvt) !== "undefined" ? "Stop when the p-value is greater than " + data.options.stop.pvt + " for " + 
+          data.options.patience + " consecutive motifs." : "No maximum <i>p</i>-value.";
+        $("opt_stop_nmotifs").innerHTML = typeof(data.options.stop.nmotifs) == "number" ? data.options.stop.nmotifs : "No maximum number of motifs.";
+        $("opt_stop_time").innerHTML = typeof(data.options.stop.time) == "number" ? data.options.stop.time + " seconds." : "No maximum running time.";
+      }
+      </script>
+    </div>
+    <!-- list information on this program -->
+    <div id="info_sec" class="bar" style="position:relative">
+      <div style="position: absolute; right: 0;"><a href="#inputs_sec">Previous</a> <a href="#">Top</a></div>
+      <div class="subsection">
+        <h5 id="version">STREME version</h5>
+        <span id="ins_version"></span> 
+        (Release date: <span id="ins_release"></span>)<br>
+      </div>
+      <script>
+        $("ins_version").innerHTML = data["version"];
+        $("ins_release").innerHTML = data["release"];
+      </script>
+      <div class="subsection">
+        <h5 id="reference">Reference</h5>
+        <span class="citation">
+          Timothy L. Bailey,
+          &quot;STREME: Accurate and versatile sequence motif discovery&quot;,
+          <i>bioRxiv</i>, <b>preprint</b>, 2020.
+        </span>
+      </div>
+      <div class="subsection">
+        <h5 id="command">Command line</h5>
+        <textarea id="cmd" rows="3" style="width:100%;" readonly="readonly">
+        </textarea>
+        <script>$("cmd").value = data["cmd"].join(" ");</script>
+      </div>
+    </div>
+    
+  </body>
+</html>

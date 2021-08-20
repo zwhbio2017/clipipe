@@ -1,0 +1,48 @@
+# 测试成功
+include: './0_common.snakemake'
+
+output_dir = config.get("output_dir")
+summary_dir = config.get('summary_dir')
+
+def get_all_inputs(wildcards):
+    available_inputs = dict(
+        crosslink_site_file=expand('{output_dir}/peak_calling_pureclip/{sample_id}_crosslink_site.bed',output_dir=output_dir, sample_id=sample_ids),
+        binding_region_file=expand('{output_dir}/peak_calling_pureclip/{sample_id}_binding_region.bed',output_dir=output_dir, sample_id=sample_ids),
+    )
+    enabled_inputs = list(available_inputs.keys())
+    inputs = []
+    for key, l in available_inputs.items():
+        if key in enabled_inputs:
+            inputs += l
+    return inputs
+
+rule all:
+    input:
+        get_all_inputs
+
+###------------------------The output section---------------------------###
+
+rule peak_calling_pureclip:
+    input:
+        bam_file='{output_dir}/bowtie_map/{sample_id}.bam',
+        bam_index='{output_dir}/bowtie_map/{sample_id}.bam.bai'
+    output:
+        crosslink_site_file='{output_dir}/peak_calling_pureclip/{sample_id}_crosslink_site.bed',
+        binding_region_file='{output_dir}/peak_calling_pureclip/{sample_id}_binding_region.bed'
+    params:
+        genome_fasta=config.get('reference_dir') + '/hg19/GRCh37.p13.genome.fa',
+    # conda:
+    #     "./envs/pureclip.yaml"
+    threads: 
+        config.get('threads_mapping')
+    log:
+        '{output_dir}/log/peak_calling_pureclip/{sample_id}.log'
+    shell:
+        '''pureclip \
+            -i {input.bam_file} \
+            -bai {input.bam_index} \
+            -g {params.genome_fasta} \
+            -o {output.crosslink_site_file} \
+            -or {output.binding_region_file} \
+            -nt {threads}
+        '''

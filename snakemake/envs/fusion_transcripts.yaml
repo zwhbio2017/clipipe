@@ -1,0 +1,7 @@
+channels:
+ - bioconda
+ - conda-forge
+dependencies:
+ - python=2.7
+ - star=2.7.2a
+ - star-fusion=1.7.0

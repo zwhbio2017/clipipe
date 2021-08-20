@@ -1,0 +1,834 @@
+<!-- Creator     : groff version 1.20.1 -->
+<!-- CreationDate: Tue Nov 30 10:54:48 2010 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>PHYLOGIBBS-MP</title>
+
+</head>
+<body>
+
+<h1 align="center">PHYLOGIBBS-MP</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#ESSENTIAL OPTIONS">ESSENTIAL OPTIONS</a><br>
+<a href="#ADVANCED OPTIONS">ADVANCED OPTIONS</a><br>
+<a href="#DEPRECATED OPTIONS">DEPRECATED OPTIONS</a><br>
+<a href="#OBSOLETE OPTIONS">OBSOLETE OPTIONS</a><br>
+<a href="#BUGS">BUGS</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+<a href="#AUTHORS">AUTHORS</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">PhyloGibbs-MP
+v1.9-BETA &minus; Gibbs-sampling motif finder and
+cis-regulatory module predictor incorporating phylogeny and
+tracking statistics.</p>
+
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>phylogibbs</b>
+<i>[options] inputfile1 [inputfile2 ...]</i></p>
+
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">PhyloGibbs-MP
+searches for motifs in single or multiple DNA sequences,
+each of which may be prealigned with homologous sequence
+from related species. It uses Gibbs sampling with an
+anneal+track strategy that finds multiple motifs
+simultaneously and reports their significance. The user
+needs to specify the phylogenetic tree of the
+&quot;proximities&quot; between the species that occur in
+the input multiple alignmnents (see examples below). This
+manual page describes PhyloGibbs-MP, which incorporates
+several extensions to PhyloGibbs.</p>
+
+<p style="margin-left:11%; margin-top: 1em">This manual
+page describes the program&rsquo;s command-line options. For
+the internal philosophy and description of the algorithm,
+see the phylogibbs_algorithm(7) manpage. Below is a quick
+summary of the most important options, followed by more
+detailed descriptions of all options in alphabetical
+order.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Input sequences
+are read from a list of fasta files specified at the end of
+the commandline. (When compiled with GNU getopt or a
+compatible implementation, the files may in fact be
+specified anywhere in the command line.) Alternatively, a
+single input file may be specified by the <b>&minus;f</b>
+option, which exists only for backward compatibility and may
+be removed in the future. Sequences that are not aligned
+with any other sequences may include the bases A, C, G, T,
+degenerate IUPAC symbols, and the symbol X (blocking sites
+from occurring at that position). The case of the symbols in
+unaligned sequences is ignored. If sequences are
+phylogenetically related, they must be in multi-fasta
+format, as output by Dialign or other multiple alignment
+programs; they may contain uppercase or lowercase nucleotide
+symbols A, C, G, T, dashes (-) to indicate gaps, and
+&rsquo;X&rsquo; or &rsquo;x&rsquo; to indicate a blocked
+site. Vertically aligned uppercase letters are treated as
+aligned and scored taking their phylogenetic relationship
+into account. Lowercase letters are considered unaligned
+with other sequences.</p>
+
+<p style="margin-left:11%; margin-top: 1em">To run on
+multiple sets of multiple alignments, e.g. multiple
+alignments of orthologous regulatory regions from the same
+set of species, and when not using the <b>-d</b> option
+(discriminative motif finding), the simplest way is to put
+each alignment in a separate file and list all these files
+at the end of the command line (not using the
+<b>&minus;f</b> option). However, with the <b>-d</b> option
+enabled, motifs are assumed to occur discriminatively in the
+specified files; if this is not desired for a set of
+alignments, those alignments must be specified in a single
+file. When supplied in one file, the different alignments
+are to be separated by using a double tick
+&quot;&gt;&gt;&quot; instead of a single tick
+&quot;&gt;&quot; on the header of the first species in each
+set. For example:</p>
+
+
+<p style="margin-left:22%; margin-top: 1em">&gt;&gt;SpeciesA
+region 1 <br>
+ACTGACataAGCAGAC... <br>
+&gt;SpeciesB region 1 <br>
+AGTCAC--aATCAGAT... <br>
+&gt;&gt;SpeciesA region 2 <br>
+CATCACATA--agaat... <br>
+&gt;SpeciesB region 2 <br>
+CATCGCAAAaagcata...</p>
+
+<p style="margin-left:11%; margin-top: 1em">Here, the two
+region 1 sequences from species A and species B are aligned
+with each other, but are not aligned with the two region 2
+sequences from species A and B, because of the separator
+&quot;&gt;&gt;&quot;.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The
+interpretation of the input sequence is controlled by the
+<b>&minus;D</b> <br>
+option; 0 ignores phylogeny and treats all sequences as
+unaligned, 1 and 2 both assume phylogeny but with different
+degrees of strictness regarding which alignment blocks can
+be considered candidate locations for binding sites. The
+relation of the species to their common ancestor must be
+specified using the <b>-L</b> or the <b>&minus;H</b> option
+as described below (see also the advanced <b>&minus;G</b>
+option).</p>
+
+<p style="margin-left:11%; margin-top: 1em">Per default the
+best configuration of binding sites (obtained by simulated
+annealing) is written to the file &quot;output&quot; and the
+posterior probabilities of binding sites (obtained by
+tracking) are written to &quot;tracked_output&quot;. These
+filenames can be changed via the <b>&minus;o</b>
+<i>output_file</i> and <b>&minus;t</b> <i>tracking_file</i>
+options. The width of the sites is the same for all motifs
+and is set via <b>&minus;m</b> <i>motifwidth</i>. The
+&quot;prior probability&quot; that a site is a WM is given
+by the <b>&minus;p</b> -- for example, <b>&minus;p</b>
+<i>0.01</i> (the default) means one expects one binding site
+(regardless of type or &quot;colour&quot;) per 100 bp of
+sequence. Note that this number should not be greater than
+the reciprocal of the width of the site (<b>&minus;m</b>
+option) and should in practice be much less.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Optionally,
+GBrowse-format annotations for the predictions can be
+written to files specified via the <b>&minus;g</b> option.
+At present, only predictions for the &quot;anchor
+species&quot; (the first species in the phylogeny
+parameters) are annotated to these files, and the headers
+corresponding to this species must be formatted
+appropriately (see below). These annotations may then be
+uploaded to any GBrowse server.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Fine-tuning is
+provided by a host of other options described in alphabetic
+order below; for many of these, proper usage will require an
+understanding of the internal strategy, as described in
+phylogibbs_algorithm(7).</p>
+
+<h2>ESSENTIAL OPTIONS
+<a name="ESSENTIAL OPTIONS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">These options
+must be understood in order to use Phylogibbs effectively.
+Advanced options are described in the next section. All
+options have short and long versions; use either version.
+<b><br>
+&minus;D, &minus;&minus;dialign</b> <i>num</i></p>
+
+<p style="margin-left:22%;"><i>num</i> specifies the
+&quot;alignment level&quot; of the input sequence and may be
+0, 1, 2. If 0, assume input sequences are not aligned: this
+is the default. If 1, assume they are aligned (Dialign-style
+aligned fasta, or multi-fasta), and treat inconsistent
+windows &quot;flexibly&quot;. That is, when gaps occurs
+within a multi-species aligned window, separate it into
+smaller windows (that is, windows containing fewer species)
+that each contain mutually gapless subsets of species. If 2,
+assume aligned sequences and be &quot;strict&quot; about
+windows containing gaps: reject them (never place sites at
+their positions).</p>
+
+<p style="margin-left:11%;"><b>&minus;F,
+&minus;&minus;bgfile</b> <i>filename</i></p>
+
+<p style="margin-left:22%;">File (fasta format) to use for
+estimating the background distribution. In typical cases,
+this file would consist of large amounts of intergenic
+sequence from the species of interest. Default: use the
+input file to calculate the background distribution.</p>
+
+<p style="margin-left:11%;"><b>&minus;h,
+&minus;&minus;help</b></p>
+
+<p style="margin-left:22%;">Print a brief summary of
+options and exit.</p>
+
+
+<p style="margin-left:11%;"><b>&minus;L,&minus;&minus;labeltree</b>
+<i>string</i></p>
+
+<p style="margin-left:22%;">This is required to specify
+general phylogenies (&quot;star topology&quot; phylogenies
+can be specified with <b>-H</b>, see below). The supplied
+<i>string</i> specifies the phylogenetic tree and must be
+complete and correct. The tree format that we use is the
+standard Newick format. However, the values that are
+normally branch lengths are instead &quot;proximities&quot;
+in our format. A proximity gives the probability that no
+mutation has taken place along the branch. The names
+labelling the leafs of the tree should correspond to a
+substring that occurs in all fasta-headers of those input
+sequences that derive from this species (and that does not
+occur in the fasta-headers of sequences from other
+species).</p>
+
+<p style="margin-left:22%; margin-top: 1em">For example,
+the following phylogeny</p>
+
+<p style="margin-left:22%; margin-top: 1em">0.85 <br>
+-------- human <br>
+0.6 | <br>
+----------+ <br>
+| | 0.9 <br>
+| -------- chimp <br>
+Ancestor + <br>
+| 0.8 <br>
+| -------- mouse <br>
+| 0.7 | <br>
+----------+ <br>
+| 0.9 <br>
+-------- rat</p>
+
+<p style="margin-left:22%; margin-top: 1em">would be
+written as <i><br>
+&minus;L
+&quot;((human:0.85,chimp:0.9):0.6,(mouse:0.8,rat:0.9):0.7)&quot;</i>
+<br>
+(the string is quoted to protect the parentheses from the
+shell). Note that the proximities are between successive
+nodes or leaves: eg, 0.9 for chimp indicates that, for a
+given neutrally evolving base in chimp, the probability of
+no substitutions in this base since the common ancestor of
+chimp and human is 0.9. Proximities are multiplicative: for
+example, if the set of aligned sequences in the input does
+not actually contain the sequence for human, the human-chimp
+node will be eliminated and chimp&rsquo;s proximity to the
+common ancestor of all species in the tree will be 0.6x0.9 =
+0.54. Thus, a single tree may be used that includes species
+not occurring in the input data.</p>
+
+<p style="margin-left:11%;"><b>&minus;l,
+&minus;&minus;modulesize</b> <i>num1[,num2]</i></p>
+
+<p style="margin-left:22%;">PhyloGibbs-MP can restrict
+predictions to small unspecified regions of a large input
+sequence, such as unknown cis-regulatory modules. This
+option accepts one or (optionally) two, comma-separated,
+integers, <i>num1</i> and <i>num2</i>. <i>num1</i> is the
+length of a module. <i>num2</i>, if specified, is the
+average spacing between two modules. If <i>num2</i> is not
+specified, each sequence may contain only one module, of
+length <i>num1</i>. If <i>num2</i> is specified, a sequence
+of length <i>L</i> may contain at least one, but up to
+<i>(L+num2)/(num1+num2)</i> modules. This means that on each
+input sequence (regardless of alignment constraints)
+predictions must be restricted to such modules. Eg, with
+<b>&minus;l</b> <i>500</i> predicted sites on each sequence
+must fall within a 500bp stretch. With <b>&minus;l</b>
+<i>500,500</i>, predicted sites on sequences of length
+1500bp must fall in two 500bp stretches. If a sequence has
+length less than <i>num1</i>, predicted sites may be
+anywhere on that sequence.</p>
+
+<p style="margin-left:11%;"><b>&minus;m,
+&minus;&minus;motifwidth</b> <i>num</i></p>
+
+<p style="margin-left:22%;">Width of motifs to search for
+(integer). Default: 10.</p>
+
+<p style="margin-left:11%;"><b>&minus;N,
+&minus;&minus;ncorrel</b> <i>num</i></p>
+
+<p style="margin-left:22%;">Order of the Markov model used
+for the background probabilities. -1: use background
+probabilities of 0.25 for each base. 0: use single base
+counts. 1 or more: condition the probability of a background
+base on the <i>num</i> bases immediately preceeding it.
+Default: 1. See also the <b>&minus;F</b> and <b>&minus;P</b>
+options.</p>
+
+<p style="margin-left:22%; margin-top: 1em">One can also
+supply a comma-separated list of four floats instead of a
+single integer <i>num</i> as an argument. In that case,
+these four values (which will be automatically normalised)
+will be used as single-base background probabilities. If
+this list is ill-formed, a flat 0.25 will be assumed, with a
+warning on stderr.</p>
+
+<p style="margin-left:11%;"><b>&minus;n,
+&minus;&minus;ncolours</b> <i>num[,num]</i></p>
+
+<p style="margin-left:22%;">This option takes one, or
+optionally two (comma-separated), numbers as arguments. The
+first is the maximum total number of colours (distinct types
+of motif) being sampled for. The second applies only when
+sampling for cis-regulatory modules (see option
+<b>&minus;l</b>) and specifies the maximum number of colours
+in one single CRM. Eg, <b>&minus;n</b> <i>10,5</i> specifies
+that not more than 10 distinct kinds of motif will be
+searched for, of which not more than 5 will appear in a
+given CRM.</p>
+
+<p style="margin-left:11%;"><b>&minus;o,
+&minus;&minus;outputfile</b> <i>filename</i></p>
+
+<p style="margin-left:22%;">Write output of anneal phasse
+to <i>filename</i>. This file contains the
+maximal-a-posterior configuration of binding sites that will
+be used as a reference state during the tracking phase. If
+<i>filename</i> is &quot;stdout&quot;, output is written to
+standard output instead. The default filename is
+&quot;output&quot;.</p>
+
+<p style="margin-left:11%;"><b>&minus;p,
+&minus;&minus;wmpriorprob</b> <i>num</i></p>
+
+<p style="margin-left:22%;">The &quot;prior
+probability&quot; <i>p</i> that a given site on a sequence
+is a binding site for a weight matrix. This is used in two
+ways: first, if the length of available sequence is
+<i>S</i>, PhyloGibbs-MP ensures that (an integer
+approximation of) <i>pS</i> sites per sequence are selected
+(Note that multi-sequence windows being counted multiply.
+Unlike earlier versions of PhyloGibbs, the number of sites
+is conserved when running, not the number of windows. To be
+meaningful, therefore, <i>p</i> must be much less than
+<i>1/m</i> where <i>m</i> is the motif width (command line
+option <b>&minus;m</b>). When looking for cis-regulatory
+modules (option <b>&minus;l</b>), the length of available
+sequence is less than the total length of input sequence.
+Second, when &quot;informative prior&quot; weight matrices
+are input (option <b>&minus;M</b>), this same number is used
+in calculating, for each window, the prior probability that
+it is a sample from these informative prior weight matrices.
+Default: 0.02.</p>
+
+<p style="margin-left:11%;"><b>&minus;S,
+&minus;&minus;nsteps</b> <i>num</i></p>
+
+<p style="margin-left:22%;">Total number of steps in the
+tracking phase. This is the main option controlling the
+total running time of the algorithm. There are generally
+four phases to a run of the algorithm: A transient (warmup)
+phase, an annealing phase, a deep quench phase, and a
+tracking phase. By default the anneal phase is the same
+length as the tracking phase, the transient phase is 10% of
+this length and the deep quench phase is 3% of this length.
+The length of all these phases can be controlled
+independently with advanced options described below.
+Default: 100</p>
+
+<p style="margin-left:11%;"><b>&minus;t,
+&minus;&minus;trackedoutput</b> <i>filename</i></p>
+
+<p style="margin-left:22%;">File to which posterior
+probabilities for individual sites and the estimated weight
+matrices are written at the end of the tracking phase
+(unless this phase is disabled with <b>&minus;X</b>). The
+default filename is &quot;tracked_output&quot;.</p>
+
+<h2>ADVANCED OPTIONS
+<a name="ADVANCED OPTIONS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Use these
+options to fine-tune the working of PhyloGibbs-MP in various
+ways. <b><br>
+&minus;A , &minus;&minus;trackfile</b> <i>filename</i></p>
+
+<p style="margin-left:22%;">By default PhyloGibbs-MP uses
+the maximum-a-posterior binding site configuration found
+through simulated annealing as a reference state for the
+tracking phase. With option <b>-A</b> the algorithm instead
+uses the binding site configuration in the file
+<i>filename</i> as the reference state. Each line in
+<i>filename</i> specifies a window, i.e. the location of a
+binding site, by a set of three white-space separated
+integers: the sequence number in the input file (starting
+from zero), the start position of the window on that
+sequence (starting from zero), and the cluster label number
+(starting from one). In case of aligned sequences
+(<b>&minus;D</b>), it is sufficient to give the seq/start
+pair for one of the aligned sequences. For example, a file
+containing <br>
+0 13 1 <br>
+1 57 1 <br>
+2 40 1 <br>
+0 33 2 <br>
+1 45 2 <br>
+2 11 2 <br>
+specifies two motifs to be tracked: one with sites starting
+at positions 13, 57 and 40 on sequences 0, 1, 2,
+respectively, and the other with windows starting at 33, 45,
+11 on the same sequences. Specifying <b>&minus;A</b> skips
+the simulated anneal and deep quench phases.</p>
+
+<p style="margin-left:11%;"><b>&minus;B,
+&minus;&minus;blockedfile</b> <i>filename</i></p>
+
+<p style="margin-left:22%;">Block all windows overlapping
+sequence stretches specified in <i>filename</i>: each line
+in the file should contain, as white-space-separated
+integers, a sequence number (starting from zero), the
+starting position on that sequence (starting from zero), and
+the number of bases starting at that position to be blocked.
+All windows overlapping those bases will be ignored, i.e.
+not sampled by the program. For example, a file containing
+<br>
+0 34 5 <br>
+2 21 6 <br>
+specifies that bases 34 through 38 on sequence 0, and bases
+21 through 26 on sequence 2, are to be blocked.
+Additionally, any occurrence of a base &quot;x&quot; or
+&quot;X&quot; in the input sequence is also regarded as a
+blocked site.</p>
+
+<p style="margin-left:11%;"><b>&minus;C,
+&minus;&minus;rcsymmetric</b></p>
+
+<p style="margin-left:22%;">Assumes the motif weight
+matrices are reverse-complement-symmetric. Effectively, the
+second half of the weight matrix is assumed to be the
+reverse-complement of the first half. If the specified motif
+width is of odd length, the middle column is ignored.
+Default: turned off. This option is not extensively
+tested.</p>
+
+<p style="margin-left:11%;"><b>&minus;d,
+&minus;&minus;discprob</b> <i>num</i></p>
+
+<p style="margin-left:22%;">Perform
+&quot;discriminative&quot; motif-finding. This requires
+several (at least two) distinct fasta-format files to be
+input (don&rsquo;t use the obsolete <b>&minus;f</b> option:
+supply the filenames at the end of the commandline). Each
+file may contain one or several sequences, or several groups
+of aligned sequences separated by &quot;&gt;&gt;&quot; in
+the header as described earlier. Then PhyloGibbs-MP tries to
+find motifs that are overrepresented in one input file but
+are underrepresented in the others. Here <i>num</i> is a
+number between 0.0 and 1.0 that indicates the extent to
+which a motif occurs discriminatively, that is, the extent
+to which it is penalised if it also occurs in other groups.
+See the associated paper for more details.</p>
+
+
+<p style="margin-left:11%;"><b>&minus;E,&minus;&minus;trackingcutoff</b>
+<i>float</i></p>
+
+<p style="margin-left:22%;">A cut-off (between 0 and 1) for
+printing sites in the tracked-output file: sites with
+posterior probability less than this value will not be
+printed. Default: 0.05.</p>
+
+<p style="margin-left:11%;"><b>&minus;G,
+&minus;&minus;phylohistory</b> <i>value</i></p>
+
+<p style="margin-left:22%;">When running on aligned
+sequences, and assuming a star topology of the phylogenetic
+tree, this value is used as a default proximity for all the
+species. Thus, when neither <b>-L</b> nor <b>-H</b> are
+used, the program assumes the phylogenetic tree is a star
+topology and that all species have proximity <i>value</i> to
+the common ancestor. When <b>-H</b> is used (see below) then
+proximity <i>value</i> is used whenever there are more
+sequences in a sequence group than specified in the
+<b>-H</b> option. Note that this option is ignored when
+<b>-L</b> is used.</p>
+
+<p style="margin-left:11%;"><b>&minus;g,
+&minus;&minus;gbrowse</b> <i>filename</i></p>
+
+<p style="margin-left:22%;">Output annotations for the
+&quot;anchor species&quot; in GBrowse format. The anchor
+species corresponds to the first label in the string
+specified with the <b>&minus;L</b> command-line option. If
+<b>&minus;G</b> or <b>&minus;H</b> were used to specify the
+phylogeny, the anchor is assumed to be the first sequence in
+each sequence group. The header for each sequence
+corresponding to the anchor species must include a
+coordinate string of the form
+&quot;<i>feature:start..stop</i>&quot; where <i>feature</i>
+could be (for example) a chromosome label and <i>start</i>
+and stop are coordinates. Eg,
+&quot;2R:1428500..1429499&quot; means the input (1000bp)
+sequence corresponds to bases 1428500 through 1429499 on
+chromosome 2R. A set of output files called
+<i>filename_feature.ann</i> are then created containing
+GBrowse annotations (eg, <i>&minus;g dmel</i> with the above
+example would create a file <i>dmel_2R.ann</i>). These can
+be uploaded to a GBrowse server.</p>
+
+<p style="margin-left:11%;"><b>&minus;H,
+&minus;&minus;phylohistlist</b> <i>values</i></p>
+
+<p style="margin-left:22%;">Specifies a phylogenetic tree
+with star topology for the species from which the input
+sequences derive. This option <b>only</b> applies when: all
+groups of aligned sequences have sequences from the same set
+of species in the same order. <i>values</i> is a
+comma-separated list (no spaces) of the proximities
+(probability of no mutation along branch from ancestor to
+leaf) of each species. That is, with <b>-H</b>
+<i>0.3,0.2,0.5,0.7</i>, <i>0.3</i> is the proximity of the
+species from which the first sequence in the input file
+derives; <i>0.2</i>, the proximity of the species of the
+second sequence; and so on. All sequences must be covered,
+otherwise an error occurs.</p>
+
+<p style="margin-left:22%; margin-top: 1em">The same
+<i>values</i> will work if the input has multiple groups of
+aligned orthologous sequences and each group has sequences
+from the same set of species in the same order. If the input
+has multiple groups of aligned homologous sequences with
+different species in different groups, or if the order of
+the species differs between groups, then the more general
+<b>&minus;L</b> option needs to be used.</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p><b>&minus;I</b></p></td>
+<td width="8%"></td>
+<td width="78%">
+
+
+<p>Turns off &quot;importance sampling&quot;, a
+running-time optimisation. Using this option will cause
+marginally better results at the expense of a vastly (about
+tenfold) greater running time.</p></td></tr>
+</table>
+
+<p style="margin-left:11%;"><b>&minus;i,
+&minus;&minus;initfile</b> <i>filename</i></p>
+
+<p style="margin-left:22%;">Name of file containing a
+configuration of binding sites to be used as an initial
+state. This initial configuration will be printed to a file
+called initial_output. File format is similar to the
+<b>&minus;A</b> option, except that a fourth column,
+specifying the &quot;direction&quot; (strand) of the window,
+is required and must be 0 or 1. For example, <br>
+0 13 1 0 <br>
+1 57 1 1 <br>
+specifies that windows starting on sequence 0, position 13
+and sequence 1, position 57 should initially be given colour
+1, with directions 0 and 1 respectively (ie, on opposite
+strands). See also <b>&minus;p</b>. Per default a random
+initial configuration is used.</p>
+
+<p style="margin-left:11%;"><b>&minus;M
+&minus;&minus;motiffile</b> <i>filename</i></p>
+
+<p style="margin-left:22%;">Using this option PhyloGibbs-MP
+can search for sites for already-characterised transcription
+factors, i.e. factors for which an initial weight matrix
+(perhaps constructed from known binding sites) is available.
+<i>filename</i> contains a set of weight matrices in the
+same format as in the output files that PhyloGibbs-MP
+produces, which is also the format used by TRANSFAC and
+MEME. The width of these WMs should be at least half the
+motif width given in option <b>&minus;m</b> and not more
+than twice that width. These WMs are used to set up
+corresponding colours, and to initialise prior probabilities
+for each WM for belonging to that colour. If the number of
+WMs is equal to or more than the number of colours specified
+in the <b>&minus;n</b> option, the colours correspond to the
+first <i>n</i> WMs in this file. If the number of colours is
+greater, the remaining colours are &quot;unbiased&quot; (do
+not correspond to a prior WM). Even if a colour is
+associated with a prior WM, this association is only
+reported in the output if the sites in this colour match the
+prior WM significantly.</p>
+
+<p style="margin-left:11%;"><b>&minus;P,
+&minus;&minus;bgpscount</b> <i>value</i></p>
+
+<p style="margin-left:22%;">Weigh background probabilities
+with Markov order greater than zero with a
+&quot;pseudocount&quot; of single-site probabilities, with
+weight <i>value</i> (useful when the input sequence is not
+long enough to calculate truly reliable correlated counts
+but one wants to use them anyway). Default: 0.0. See also
+the <b>&minus;N</b> and <b>&minus;F</b> options.</p>
+
+<p style="margin-left:11%;"><b>&minus;q,
+&minus;&minus;quiet</b></p>
+
+<p style="margin-left:22%;">Run quietly (no output to
+stdout; errors and warnings are still printed on
+stderr.)</p>
+
+<p style="margin-left:11%;"><b>&minus;R,
+&minus;&minus;reverseprint</b></p>
+
+<p style="margin-left:22%;">Print starting positions of
+sites not from the start of the input sequences, but as a
+negative number from the end of input sequences (ie, the
+last base on the input sequence is numbered -1). For
+example, this may be the distance from the start of the
+gene.</p>
+
+<p style="margin-left:11%;"><b>&minus;r,
+&minus;&minus;norevcomp</b></p>
+
+<p style="margin-left:22%;">Do not search for
+reverse-complement matches (ie, do not search on the
+&quot;other strand&quot;). Default: Search on both
+strands.</p>
+
+<p style="margin-left:11%;"><b>&minus;s,
+&minus;&minus;nshiftmoves</b> <i>num</i></p>
+
+<p style="margin-left:22%;">Number of global-shift moves
+per step. In a global-shift move all windows in a colour are
+shifted to the left or right by the same amount. Default:
+twice the number of colours in the initial configuration.
+See also <b>&minus;w</b>.</p>
+
+<p style="margin-left:11%;"><b>&minus;v,
+&minus;&minus;verbose</b></p>
+
+<p style="margin-left:22%;">Print verbose information while
+running (unlike <b>&minus;q</b> which suppresses all output
+to stdout). Of <b>&minus;v</b> and <b>&minus;q</b>, the last
+to be specified applies.</p>
+
+<p style="margin-left:11%;"><b>&minus;W,
+&minus;&minus;write-each-cycle</b></p>
+
+<p style="margin-left:22%;">Write the output and
+tracked-output (see <b>&minus;o</b> and <b>&minus;t</b>)
+after every step, instead of just at the end of the anneal
+and tracking phases respectively.</p>
+
+<p style="margin-left:11%;"><b>&minus;w,
+&minus;&minus;nwinmoves</b> <i>num</i></p>
+
+<p style="margin-left:22%;">Number of window-shift moves
+per step. Default: Equal to the total number of windows in
+the initial configuration. See also <b>&minus;s</b>.</p>
+
+<p style="margin-left:11%;"><b>&minus;X,
+&minus;&minus;noautotrack</b></p>
+
+<p style="margin-left:22%;">Disable tracking: quit after
+the simulated-anneal and deep quench phase have finished.
+The default is to due a tracking phase as well.</p>
+
+<p style="margin-left:11%;"><b>&minus;x,
+&minus;&minus;betaincr</b> <i>value</i></p>
+
+<p style="margin-left:22%;">Factor by which to increase
+fictitious inverse temperature (beta) at each step in the
+simulated-annealing phase. Must be greater than 1. Default:
+1.2.</p>
+
+<h2>DEPRECATED OPTIONS
+<a name="DEPRECATED OPTIONS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>&minus;f,
+&minus;&minus;inputfile</b> <i>filename</i></p>
+
+<p style="margin-left:22%;">Name of a (single) input
+sequence file, in fasta or aligned-fasta format. Default:
+none (must be supplied). This option is a relic of earlier
+releases and may be removed in future. Input files may now
+be specified at the end of the command line (or, on systems
+with GNU or compatible getopt(), anywhere on the command
+line), and multiple files may thus be specified.</p>
+
+<h2>OBSOLETE OPTIONS
+<a name="OBSOLETE OPTIONS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>&minus;I,
+&minus;&minus;initialocc</b> <i>nums</i></p>
+
+<p style="margin-left:22%;">This used to specify the
+initial configuration of selected windows and colours. See
+<b>&minus;p</b> and <b>&minus;n</b> for the new equivalents.
+This option (without arguments) now turns off importance
+sampling.</p>
+
+<p style="margin-left:11%;"><b>&minus;T,
+&minus;&minus;pseudocount</b></p>
+
+<p style="margin-left:22%;">To reduce command clutter, this
+is now frozen at the original default of 1.0, which is
+arguably the most unbiased choice and seems to work
+well.</p>
+
+<p style="margin-left:11%;"><b>&minus;a, &minus;u,
+&minus;g</b></p>
+
+<p style="margin-left:22%;">These individually controlled
+lengths of various phases but, to reduce command clutter,
+are now all defined as fractions of the <b>&minus;S</b>
+option. <b>&minus;g</b> now has a new, unrelated
+meaning.</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="3%">
+
+
+<p><b>&minus;c</b></p></td>
+<td width="8%"></td>
+<td width="78%">
+
+
+<p>This specified the number of &quot;colour-change
+moves&quot; per cycle, which was zero by default. This class
+of moves has been eliminated: PhyloGibbs-MP runs with a
+fixed upper-limit number of colours (but fewer colours may
+actually be reported) and a fixed number of predicted sites
+(specified by the <b>&minus;p</b> option).</p></td></tr>
+</table>
+
+<p style="margin-left:11%;"><b>&minus;p, &minus;y,
+&minus;z</b></p>
+
+<p style="margin-left:22%;">These were used with
+&quot;colour-change moves&quot; which are now
+eliminated.</p>
+
+<h2>BUGS
+<a name="BUGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">While efforts
+are made to warn on improper input, improperly formatted
+input files (fasta files, blocked-window files, etc) may
+crash the program or fail silently with mysterious results.
+In particular, CR-delineated files (old-MacOS-style) will
+not work; convert them to Unix-style LF-delineated files.
+DOS/Windows-style CR-LF files will probably work but are not
+regularly tested.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The program is
+sprinkled with asserts that (if compiled with -DDEBUG)
+should catch inconsistencies early and terminate execution
+rather than fail silently. If you come across such an assert
+error, or other bugs, or have a feature wishlist, send email
+to the authors, preferably including the complete
+commandline, the GSL random number seed (which are both
+printed in the output file), and the offending input
+file.</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The
+phylogibbs_algorithm(7) manpage for internal details of the
+algorithm and further references.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Papers:
+&quot;PhyloGibbs: A Gibbs Sampling Motif Finder That
+Incorporates Phylogeny&quot; (R. Siddharthan, E. D. Siggia,
+E. van Nimwegen, PLoS Computational Biology 1(7): e67,
+2005)</p>
+
+
+<p style="margin-left:11%; margin-top: 1em">&quot;PhyloGibbs-MP:
+Module prediction and discriminative motif finding by Gibbs
+sampling&quot; (R. Siddharthan, PLoS Computational Biology,
+2008, to appear)</p>
+
+<h2>AUTHORS
+<a name="AUTHORS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">PhyloGibbs-MP
+was developed and coded by Rahul Siddharthan, based on the
+earlier PhyloGibbs algorithm. See
+http://www.imsc.res.in/~rsidd/phylogibbs/ for contact
+information.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The PhyloGibbs
+algorithm was developed during 2002-2005 by Rahul
+Siddharthan, Erik van Nimwegen, and Eric D. Siggia. The code
+was written by Rahul Siddharthan and Erik van Nimwegen.</p>
+<hr>
+</body>
+</html>

@@ -1,0 +1,547 @@
+.\"                       PhyloGibbs-MP
+.\"  (C) Rahul Siddharthan, 2004-2007
+.\"
+.\"  Based on and re-uses code from PhyloGibbs, which was
+.\"  developed by Rahul Siddharthan, Eric D. Siggia
+.\"  and Erik van Nimwegen and coded by RS and EvN.
+.\"  (C) Rahul Siddharthan and Erik van Nimwegen, 2004-2006
+.\"
+.\"  Licensed under the GNU General Public License (see COPYING)
+.\"  $Id: phylogibbs.1,v 1.38 2008-09-17 17:46:47 rsidd Exp $
+.\"
+.TH PHYLOGIBBS-MP 1 "September 14, 2007"
+.SH NAME
+PhyloGibbs-MP v1.9-BETA \- Gibbs-sampling motif finder and cis-regulatory 
+module predictor incorporating phylogeny and tracking statistics.
+.SH SYNOPSIS
+\fBphylogibbs \fI[options] inputfile1 [inputfile2 ...]
+.SH DESCRIPTION
+PhyloGibbs-MP searches for motifs in single or multiple DNA sequences, each
+of which may be prealigned with homologous sequence from related
+species.  It uses Gibbs sampling with an anneal+track strategy that
+finds multiple motifs simultaneously and reports their
+significance. The user needs to specify the phylogenetic tree of the
+"proximities" between the species that occur in the input multiple
+alignmnents (see examples below).  This manual page describes
+PhyloGibbs-MP, which incorporates several extensions to PhyloGibbs.
+.PP
+This manual page describes the program's command-line options. For the
+internal philosophy and description of the algorithm, see the
+phylogibbs_algorithm(7) manpage. Below is a quick summary of the most
+important options, followed by more detailed descriptions of all
+options in alphabetical order.
+.PP
+Input sequences are read from a list of fasta files specified at the
+end of the commandline.  (When compiled with GNU getopt or a
+compatible implementation, the files may in fact be specified anywhere
+in the command line.)  Alternatively, a single input file may be
+specified by the \fB\-f\fR option, which exists only for backward
+compatibility and may be removed in the future.  Sequences that are
+not aligned with any other sequences may include the bases A, C, G, T,
+degenerate IUPAC symbols, and the symbol X (blocking sites from
+occurring at that position). The case of the symbols in unaligned
+sequences is ignored. If sequences are phylogenetically related, they
+must be in multi-fasta format, as output by Dialign or other multiple
+alignment programs; they may contain uppercase or lowercase nucleotide
+symbols A, C, G, T, dashes (-) to indicate gaps, and 'X' or 'x' to
+indicate a blocked site. Vertically aligned uppercase letters are
+treated as aligned and scored taking their phylogenetic relationship
+into account. Lowercase letters are considered unaligned with other
+sequences.
+.PP
+To run on multiple sets of multiple alignments, e.g. multiple
+alignments of orthologous regulatory regions from the same set of
+species, and when not using the \fB-d\fR option (discriminative motif
+finding), the simplest way is to put each alignment in a separate file
+and list all these files at the end of the command line (not using the
+\fB\-f\fR option).  However, with the \fB-d\fR option enabled, motifs
+are assumed to occur discriminatively in the specified files; if this is
+not desired for a set of alignments, those alignments must be
+specified in a single file.  When supplied in one file, the different
+alignments are to be separated by using a double tick ">>" instead of
+a single tick ">" on the header of the first species in each set.  For
+example:
+.PP
+.RS
+.nf
+>>SpeciesA region 1
+ACTGACataAGCAGAC...
+>SpeciesB region 1
+AGTCAC--aATCAGAT...
+>>SpeciesA region 2 
+CATCACATA--agaat...
+>SpeciesB region 2 
+CATCGCAAAaagcata...
+.fi
+.RE
+.PP
+Here, the two region 1 sequences from species A and species B are
+aligned with each other, but are not aligned with the two region 2
+sequences from species A and B, because of the separator ">>".
+.PP
+The interpretation of the input sequence is controlled by the \fB\-D
+\fR option; 0 ignores phylogeny and treats all sequences as unaligned,
+1 and 2 both assume phylogeny but with different degrees of strictness
+regarding which alignment blocks can be considered candidate locations
+for binding sites. The relation of the species to their common
+ancestor must be specified using the \fB-L\fR or the \fB\-H\fR option
+as described below (see also the advanced \fB\-G\fR option).
+.PP                                                                      
+Per default the best configuration of binding sites (obtained by
+simulated annealing) is written to the file "output" and the posterior
+probabilities of binding sites (obtained by tracking) are written to
+"tracked_output". These filenames can be changed via the \fB\-o
+\fIoutput_file\fR and \fB\-t \fItracking_file\fR options.  The width
+of the sites is the same for all motifs and is set via \fB\-m
+\fImotifwidth\fR. The "prior probability" that a site is a WM is given
+by the \fB\-p\fR -- for example, \fB\-p\fR \fI0.01\fR (the default)
+means one expects one binding site (regardless of type or "colour")
+per 100 bp of sequence.  Note that this number should not be greater
+than the reciprocal of the width of the site (\fB\-m\fR option) and
+should in practice be much less.
+.PP
+Optionally, GBrowse-format annotations for the predictions can be
+written to files specified via the \fB\-g\fR option.  At present, only
+predictions for the "anchor species" (the first species in the
+phylogeny parameters) are annotated to these files, and the headers
+corresponding to this species must be formatted appropriately (see
+below).  These annotations may then be uploaded to any GBrowse server.
+.PP  
+Fine-tuning is provided by a host of other options described in 
+alphabetic order below; for many of these, proper usage will require 
+an understanding of the internal strategy, as described in 
+phylogibbs_algorithm(7).
+.PP
+.SH ESSENTIAL OPTIONS
+These options must be understood in order to use Phylogibbs
+effectively. Advanced options are described in the next section.
+All options have short and long versions; use either version.
+.TP
+.B \-D, \-\-dialign \fInum\fB
+\fInum\fR specifies the "alignment level" of the input sequence and
+may be 0, 1, 2.  If 0, assume input sequences are not aligned: this is
+the default. If 1, assume they are aligned (Dialign-style aligned
+fasta, or multi-fasta), and treat inconsistent windows
+"flexibly". That is, when gaps occurs within a multi-species aligned
+window, separate it into smaller windows (that is, windows containing
+fewer species) that each contain mutually gapless subsets of
+species. If 2, assume aligned sequences and be "strict" about windows
+containing gaps: reject them (never place sites at their positions).
+.TP
+.B \-F, \-\-bgfile \fIfilename\fB
+File (fasta format) to use for estimating the background
+distribution. In typical cases, this file would consist of large
+amounts of intergenic sequence from the species of interest. Default:
+use the input file to calculate the background distribution.
+.TP
+.B \-h, \-\-help
+Print a brief summary of options and exit.
+.TP
+.B \-L,\-\-labeltree \fIstring\fB
+This is required to specify general phylogenies ("star topology"
+phylogenies can be specified with \fB-H\fR, see below). The supplied
+\fIstring\fR specifies the phylogenetic tree and must be complete and
+correct.  The tree format that we use is the standard Newick
+format. However, the values that are normally branch lengths are
+instead "proximities" in our format. A proximity gives the probability
+that no mutation has taken place along the branch. The names labelling
+the leafs of the tree should correspond to a substring that occurs in
+all fasta-headers of those input sequences that derive from this
+species (and that does not occur in the fasta-headers of sequences
+from other species). 
+
+For example, the following phylogeny
+.nf
+
+                       0.85
+                     -------- human
+              0.6   |
+          ----------+
+         |          |  0.9
+         |           -------- chimp
+Ancestor +
+         |             0.8
+         |           -------- mouse
+         |    0.7   |
+          ----------+
+                    |  0.9
+                     -------- rat
+
+.fi
+would be written as 
+.br
+\fI\-L "((human:0.85,chimp:0.9):0.6,(mouse:0.8,rat:0.9):0.7)"\fR
+.br
+(the string is quoted to protect the parentheses from the shell).
+Note that the proximities are between successive nodes or leaves: eg,
+0.9 for chimp indicates that, for a given neutrally evolving base in
+chimp, the probability of no substitutions in this base since the
+common ancestor of chimp and human is 0.9. Proximities are
+multiplicative: for example, if the set of aligned sequences in the
+input does not actually contain the sequence for human, the
+human-chimp node will be eliminated and chimp's proximity to the
+common ancestor of all species in the tree will be 0.6x0.9 =
+0.54. Thus, a single tree may be used that includes species not
+occurring in the input data.
+.TP
+.B \-l, \-\-modulesize \fInum1[,num2]\fR
+PhyloGibbs-MP can restrict predictions to small unspecified regions of
+a large input sequence, such as unknown cis-regulatory modules.  This
+option accepts one or (optionally) two, comma-separated, integers,
+\fInum1\fR and \fInum2\fR.
+\fInum1\fR is the length of a module.  \fInum2\fR, if specified, is the
+average spacing between two modules.  If \fInum2\fR is not specified,
+each sequence may contain only one module, of length \fInum1\fR.  If
+\fInum2\fR is specified, a sequence of length \fIL\fR may contain
+at least one, but up to \fI(L+num2)/(num1+num2)\fR modules.
+This means that on each input sequence (regardless of alignment
+constraints) predictions must be restricted to such modules.  Eg, with
+\fB\-l\fR \fI500\fR predicted sites on each sequence must fall within a
+500bp stretch.  With \fB\-l\fR \fI500,500\fR, predicted sites on
+sequences of length 1500bp must fall in two 500bp stretches.  If a
+sequence has length less than \fInum1\fR, predicted sites may be
+anywhere on that sequence.
+.TP
+.B \-m, \-\-motifwidth \fInum\fB
+Width of motifs to search for (integer). Default: 10.
+.TP
+.B \-N, \-\-ncorrel \fInum\fB
+Order of the Markov model used for the background probabilities.  -1:
+use background probabilities of 0.25 for each base. 0: use single
+base counts. 1 or more: condition the probability of a background base
+on the \fInum\fR bases immediately preceeding it. Default: 1. See
+also the \fB\-F\fR and \fB\-P\fR options.
+
+One can also supply a comma-separated list of four floats instead of a
+single integer \fInum\fR as an argument. In that case, these four
+values (which will be automatically normalised) will be used as
+single-base background probabilities. If this list is ill-formed, a
+flat 0.25 will be assumed, with a warning on stderr.
+.TP
+.B \-n, \-\-ncolours \fInum[,num]\fR
+This option takes one, or optionally two (comma-separated), numbers as
+arguments.  The first is the maximum total number of colours (distinct
+types of motif) being sampled for.  The second applies only when
+sampling for cis-regulatory modules (see option \fB\-l\fR) and
+specifies the maximum number of colours in one single CRM.  Eg,
+\fB\-n\fR \fI10,5\fR specifies that not more than 10 distinct kinds of
+motif will be searched for, of which not more than 5 will appear in a
+given CRM.
+.TP
+.B \-o, \-\-outputfile \fIfilename\fB
+Write output of anneal phasse to \fIfilename\fR. This file contains
+the maximal-a-posterior configuration of binding sites that will be
+used as a reference state during the tracking phase. If \fIfilename\fR
+is "stdout", output is written to standard output instead. The default
+filename is "output".
+.TP
+.B \-p, \-\-wmpriorprob \fInum\fB
+The "prior probability" \fIp\fR that a given site on a sequence is a
+binding site for a weight matrix.  This is used in two ways: first, if
+the length of available sequence is \fIS\fR, PhyloGibbs-MP ensures
+that (an integer approximation of) \fIpS\fR sites per sequence are
+selected (Note that multi-sequence windows being counted multiply.
+Unlike earlier versions of PhyloGibbs, the number of sites is
+conserved when running, not the number of windows.  To be meaningful,
+therefore, \fIp\fR must be much less than \fI1/m\fR where \fIm\fR is
+the motif width (command line option \fB\-m\fR).  When looking for
+cis-regulatory modules (option \fB\-l\fR), the length of available
+sequence is less than the total length of input sequence.  Second,
+when "informative prior" weight matrices are input (option \fB\-M\fR),
+this same number is used in calculating, for each window, the prior
+probability that it is a sample from these informative prior weight
+matrices.  Default: 0.02.
+.TP
+.B \-S, \-\-nsteps \fInum\fB
+Total number of steps in the tracking phase. This is the main option
+controlling the total running time of the algorithm. There are
+generally four phases to a run of the algorithm: A transient (warmup)
+phase, an annealing phase, a deep quench phase, and a tracking
+phase. By default the anneal phase is the same length as the tracking
+phase, the transient phase is 10% of this length and the deep quench
+phase is 3% of this length. The length of all these phases can be
+controlled independently with advanced options described
+below. Default: 100
+.TP
+.B \-t, \-\-trackedoutput \fIfilename\fB
+File to which posterior probabilities for individual sites and the
+estimated weight matrices are written at the end of the tracking phase
+(unless this phase is disabled with \fB\-X\fR). The default filename
+is "tracked_output".
+.PP
+.SH ADVANCED OPTIONS
+Use these options to fine-tune the working of PhyloGibbs-MP in various
+ways. 
+.TP
+.B \-A , \-\-trackfile \fIfilename\fB
+By default PhyloGibbs-MP uses the maximum-a-posterior binding site
+configuration found through simulated annealing as a reference state
+for the tracking phase. With option \fB-A\fR the algorithm instead
+uses the binding site configuration in the file \fIfilename\fR as the
+reference state. Each line in \fIfilename\fR specifies a window,
+i.e. the location of a binding site, by a set of three white-space
+separated integers: the sequence number in the input file (starting
+from zero), the start position of the window on that sequence
+(starting from zero), and the cluster label number (starting from
+one). In case of aligned sequences (\fB\-D\fR), it is sufficient to
+give the seq/start pair for one of the aligned sequences. For example,
+a file containing
+.nf
+0  13  1
+1  57  1
+2  40  1
+0  33  2
+1  45  2
+2  11  2
+.fi
+specifies two motifs to be tracked: one with sites starting at
+positions 13, 57 and 40 on sequences 0, 1, 2, respectively, and the
+other with windows starting at 33, 45, 11 on the same
+sequences. Specifying \fB\-A\fR skips the simulated anneal and deep
+quench phases.
+.TP
+.B \-B, \-\-blockedfile \fIfilename\fB
+Block all windows overlapping sequence stretches specified in
+\fIfilename\fR: each line in the file should contain, as
+white-space-separated integers, a sequence number (starting from
+zero), the starting position on that sequence (starting from zero),
+and the number of bases starting at that position to be blocked.  All
+windows overlapping those bases will be ignored, i.e. not sampled by
+the program.  For example, a file containing
+.nf
+0 34 5
+2 21 6
+.fi
+specifies that bases 34 through 38 on sequence 0, and bases 21 through
+26 on sequence 2, are to be blocked.  Additionally, any occurrence of
+a base "x" or "X" in the input sequence is also regarded as a blocked
+site.
+.TP
+.B \-C, \-\-rcsymmetric
+Assumes the motif weight matrices are
+reverse-complement-symmetric. Effectively, the second half of the
+weight matrix is assumed to be the reverse-complement of the first
+half. If the specified motif width is of odd length, the middle column
+is ignored. Default: turned off. This option is not extensively tested.
+.TP
+.B \-d, \-\-discprob \fInum\fB
+Perform "discriminative" motif-finding.  This requires several (at least two)
+distinct fasta-format files to be input (don't use the obsolete \fB\-f\fR
+option: supply the filenames at the end of the commandline).  Each file may
+contain one or several sequences, or several groups of aligned sequences
+separated by ">>" in the header as described earlier.  Then PhyloGibbs-MP tries
+to find motifs that are overrepresented in one input file but are
+underrepresented in the others.  Here \fInum\fR is a number between 0.0 and 1.0
+that indicates the extent to which a motif occurs discriminatively, that is,
+the extent to which it is penalised if it also occurs in other groups.  See the associated paper for more details.
+.TP
+.B \-E,\-\-trackingcutoff \fIfloat\fB
+A cut-off (between 0 and 1) for printing sites in the tracked-output
+file: sites with posterior probability less than this value will not
+be printed. Default: 0.05.
+.TP
+.B \-G, \-\-phylohistory \fIvalue\fB
+When running on aligned sequences, and assuming a star topology of the
+phylogenetic tree, this value is used as a default proximity for all
+the species. Thus, when neither \fB-L\fR nor \fB-H\fR are used, the
+program assumes the phylogenetic tree is a star topology and that all
+species have proximity \fIvalue\fR to the common ancestor. When
+\fB-H\fR is used (see below) then proximity \fIvalue\fR is used
+whenever there are more sequences in a sequence group than specified
+in the \fB-H\fR option. Note that this option is ignored when
+\fB-L\fR is used.
+.TP
+.B \-g, \-\-gbrowse \fIfilename\fB
+Output annotations for the "anchor species" in GBrowse format.
+The anchor species corresponds to the first label in the string
+specified with the \fB\-L\fR command-line option.  If \fB\-G\fR or
+\fB\-H\fR were used to specify the phylogeny, the anchor 
+is assumed to be the first sequence in each sequence group.  The header
+for each sequence corresponding to the anchor species must include a
+coordinate string of the form "\fIfeature:start..stop\fR" where
+\fIfeature\fR could be (for example) a chromosome label and
+\fIstart\fR and \fRstop\fR are coordinates.  Eg, "2R:1428500..1429499"
+means the input (1000bp) sequence corresponds to bases 1428500 through
+1429499 on chromosome 2R.  A set of output files called
+\fIfilename_feature.ann\fR are then created containing GBrowse
+annotations (eg, \fI\-g dmel\fR with the above example would create
+a file \fIdmel_2R.ann\fR).  These can be uploaded to a GBrowse server.
+.TP
+.B \-H, \-\-phylohistlist \fIvalues\fB
+Specifies a phylogenetic tree with star topology for the species from
+which the input sequences derive. This option \fBonly\fR applies when:
+all groups of aligned sequences have sequences from the same set of
+species in the same order. \fIvalues\fR is a comma-separated list (no
+spaces) of the proximities (probability of no mutation along branch
+from ancestor to leaf) of each species. That is, with \fB-H\fR
+\fI0.3,0.2,0.5,0.7\fR, \fI0.3\fR is the proximity of the species from
+which the first sequence in the input file derives; \fI0.2\fR, the
+proximity of the species of the second sequence; and so on. All
+sequences must be covered, otherwise an error occurs.
+
+The same \fIvalues\fR will work if the input has multiple groups of
+aligned orthologous sequences and each group has sequences from the
+same set of species in the same order.  If the input has multiple
+groups of aligned homologous sequences with different species in
+different groups, or if the order of the species differs between
+groups, then the more general \fB\-L\fR option  needs to be used. 
+.TP
+.B \-I
+Turns off "importance sampling", a running-time optimisation.  Using
+this option will cause marginally better results at the expense of a
+vastly (about tenfold) greater running time.
+.TP
+.B \-i, \-\-initfile \fIfilename\fB
+Name of file containing a configuration of binding sites to be used as
+an initial state. This initial configuration will be printed to a file
+called initial_output.  File format is similar to the \fB\-A\fR
+option, except that a fourth column, specifying the "direction"
+(strand) of the window, is required and must be 0 or 1.  For example,
+.nf
+0  13  1  0
+1  57  1  1
+.fi  
+specifies that windows starting on sequence 0, position 13 and
+sequence 1, position 57 should initially be given colour 1, with
+directions 0 and 1 respectively (ie, on opposite strands).  See also
+\fB\-p\fR. Per default a random initial configuration is used.
+.TP
+.B \-M \-\-motiffile \fIfilename\fB
+Using this option PhyloGibbs-MP can search for sites for
+already-characterised transcription factors, i.e. factors for which an
+initial weight matrix (perhaps constructed from known binding sites)
+is available. \fIfilename\fR contains a set of weight matrices in the
+same format as in the output files that PhyloGibbs-MP produces, which is
+also the format used by TRANSFAC and MEME.  The width of these WMs
+should be at least half the motif width given in option \fB\-m\fR and
+not more than twice that width.  These WMs are used to set up
+corresponding colours, and to initialise prior probabilities for each
+WM for belonging to that colour.  If the number of WMs is equal to or
+more than the number of colours specified in the \fB\-n\fR option, the
+colours correspond to the first \fIn\fR WMs in this file.  If the
+number of colours is greater, the remaining colours are "unbiased" (do
+not correspond to a prior WM).  Even if a colour is associated with a
+prior WM, this association is only reported in the output if the sites
+in this colour match the prior WM significantly.
+.TP
+.B \-P, \-\-bgpscount \fIvalue\fB
+Weigh background probabilities with Markov order greater than zero
+with a "pseudocount" of single-site probabilities, with weight
+\fIvalue\fR (useful when the input sequence is not long enough to
+calculate truly reliable correlated counts but one wants to use them
+anyway).  Default: 0.0.  See also the \fB\-N\fR and \fB\-F\fR options.
+.TP
+.B \-q, \-\-quiet
+Run quietly (no output to stdout; errors and warnings are still
+printed on stderr.)
+.TP
+.B \-R, \-\-reverseprint
+Print starting positions of sites not from the start of the input
+sequences, but as a negative number from the end of input sequences
+(ie, the last base on the input sequence is numbered -1).  For
+example, this may be the distance from the start of the gene.
+.TP
+.B \-r, \-\-norevcomp
+Do not search for reverse-complement matches (ie, do not search on the
+"other strand"). Default: Search on both strands.
+.TP
+.B \-s, \-\-nshiftmoves \fInum\fB
+Number of global-shift moves per step. In a global-shift move all
+windows in a colour are shifted to the left or right by the same
+amount. Default: twice the number of colours in the initial configuration.
+See also \fB\-w\fR.
+.TP
+.B \-v, \-\-verbose
+Print verbose information while running (unlike \fB\-q\fR which
+suppresses all output to stdout).  Of \fB\-v\fR and \fB\-q\fR, the
+last to be specified applies.
+.TP
+.B \-W, \-\-write-each-cycle
+Write the output and tracked-output (see \fB\-o\fR and \fB\-t\fR)
+after every step, instead of just at the end of the anneal and
+tracking phases respectively.
+.TP
+.B \-w, \-\-nwinmoves \fInum\fB
+Number of window-shift moves per step.  Default: Equal to the total
+number of windows in the initial configuration. See also
+\fB\-s\fR.
+.TP
+.B \-X, \-\-noautotrack
+Disable tracking: quit after the simulated-anneal and deep quench
+phase have finished. The default is to due a tracking phase as well.
+.TP
+.B \-x, \-\-betaincr \fIvalue\fB
+Factor by which to increase fictitious inverse temperature (beta) at
+each step in the simulated-annealing phase. Must be greater than 1.
+Default: 1.2.
+.PP
+.SH DEPRECATED OPTIONS
+.TP
+.B \-f, \-\-inputfile \fIfilename\fB
+Name of a (single) input sequence file, in fasta or
+aligned-fasta format.  Default: none (must be supplied).  This option
+is a relic of earlier releases and may be removed in future.  Input files may
+now be specified at the end of the command line (or, on systems with
+GNU or compatible getopt(), anywhere on the command line), and multiple files
+may thus be specified.
+.PP
+.SH OBSOLETE OPTIONS
+.TP
+.B \-I, \-\-initialocc \fInums\fB
+This used to specify the initial configuration of selected windows and
+colours.  See \fB\-p\fR and \fB\-n\fR for the new equivalents.  This
+option (without arguments) now turns off importance sampling.
+.TP
+.B \-T, \-\-pseudocount
+To reduce command clutter, this is now frozen at the original default
+of 1.0, which is arguably the most unbiased choice and seems to work
+well.
+.TP
+.B \-a, \-u, \-g 
+These individually controlled lengths of various
+phases but, to reduce command clutter, are now all defined as
+fractions of the \fB\-S\fR option.  \fB\-g\fR now has a new, unrelated
+meaning.
+.TP
+.B \-c
+This specified the number of "colour-change moves" per cycle, which
+was zero by default.  This class of moves has been eliminated:
+PhyloGibbs-MP runs with a fixed upper-limit number of colours (but
+fewer colours may actually be reported) and a fixed number of
+predicted sites (specified by the \fB\-p\fR option).
+.TP
+.B \-p, \-y, \-z
+These were used with "colour-change moves" which are now eliminated.
+.PP
+.SH BUGS
+While efforts are made to warn on improper input, improperly formatted
+input files (fasta files, blocked-window files, etc) may crash the
+program or fail silently with mysterious results.  In particular,
+CR-delineated files (old-MacOS-style) will not work; convert them to
+Unix-style LF-delineated files.  DOS/Windows-style CR-LF files will
+probably work but are not regularly tested.
+.PP
+The program is sprinkled with asserts that (if compiled with -DDEBUG)
+should catch inconsistencies early and terminate execution rather than
+fail silently.  If you come across such an assert error, or other
+bugs, or have a feature wishlist, send email to the authors,
+preferably including the complete commandline, the GSL random number
+seed (which are both printed in the output file), and the offending
+input file.
+.PP
+.SH SEE ALSO
+The phylogibbs_algorithm(7) manpage for internal details of the
+algorithm and further references.
+.PP
+Papers: "PhyloGibbs: A Gibbs Sampling Motif Finder That Incorporates Phylogeny"
+(R. Siddharthan, E. D. Siggia, E. van Nimwegen, PLoS Computational Biology 1(7): e67, 2005)
+.PP
+"PhyloGibbs-MP: Module prediction and discriminative motif finding by Gibbs sampling" (R. Siddharthan, PLoS Computational Biology, 2008, to appear)
+.SH AUTHORS
+PhyloGibbs-MP was developed and coded by Rahul Siddharthan, based on
+the earlier PhyloGibbs algorithm.  See
+http://www.imsc.res.in/~rsidd/phylogibbs/ for contact information.
+.PP
+The PhyloGibbs algorithm was developed during 2002-2005 by Rahul
+Siddharthan, Erik van Nimwegen, and Eric D. Siggia.  The code was
+written by Rahul Siddharthan and Erik van Nimwegen.

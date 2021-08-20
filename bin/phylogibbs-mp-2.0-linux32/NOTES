@@ -1,0 +1,58 @@
+                       PhyloGibbs-MP
+
+Copyright (C) 2007 by Rahul Siddharthan <rsidd@imsc.res.in> 
+       (The Institute of Mathematical Sciences, Chennai, India)
+
+Based on PhyloGibbs, copyright (C) 2004-2007
+    Rahul Siddharthan
+    Eric D. Siggia <siggia@eds1.rockefeller.edu>
+       (The Rockefeller University, New York, USA)
+    Erik van Nimwegen <Erik.Vannimwegen@unibas.ch>
+       (Biozentrum, University of Basel, Switzerland)
+
+Redistribution permitted under the terms of the GNU General Public
+License (see file COPYING in source distribution).
+
+This is a quick summary of usage options.  For details, see the
+phylogibbs(1) and phylogibbs_algorithm(7) manpages (included with the
+source code as phylogibbs.1 and phylogibbs_algorithm.7).
+
+Quick start (no phylogeny): 
+  phylogibbs [-m motifwidth] input_seqfile [input_seqfile2 ...]
+Quick start (phylogeny):
+  phylogibbs [-D 1] [-G conservation_prob] [-m motifwidth] input_seqfile [input_seqfile2 ...]
+
+Command-line options:
+-A, --trackfile filename : Track labelled clusters specified in filename
+-B, --blockedfile filename : Read a list of blocked windows from filename
+-C, --rcsymmetric : Search for reverse-complement-symmetric motifs
+-D, --dialign n : (n=0) No alignment; (n=1) Loose align; (n=2) Strict align
+-d, --discprob p: "Penalty" in discriminative motif finding (default none= 1.0)
+-E, --trackingcutoff e: Cut-off (float) for printing tracking statistics
+-F, --bgfile filename : Read background sequence from filename
+-G, --phylohistory value : Assume uniform conservation "value" from ancestor
+-g, --gbrowse filename : Output GBrowse-format annotations
+-H, --phylohistlist list : Assume per-sequence conservation "list" (comma-sep)
+-h, --help : Print this quick help summary and exit
+-I, --noimportance : Turn off importance sampling
+-i, --initfile filename : Read initial window config from filename
+-L, --labeltree treestring: specify a complete, general (not star) phylogeny
+-l, --modulesize n[,m] : Size of and (optionally) spacing between modules
+-M, --motiffile filename : "Seed" with already-known motifs
+-m, --motifwidth n : Search for motifs of width n
+-N, --ncorrel n : Level of background correl (n-site, n=-1 = 0.25 each)
+-n, --ncolours n[,n2] : Total number of colours, and optionally num per module
+-o, --outputfile filename : Write anneal snapshots to filename
+-P, --bgpseudocount value : Weigh bg model with pseudocount of 1-site freqs
+-p, --wmpriorprob value : Prior prob that a given site is WM (default 0.01)
+-q, --quiet : Run quietly, no screen output
+-R, --reverseprint : Print (negative) position backwards from end of sequence
+-r, --norevcomp : Search for motifs only on one strand
+-S, --ncycles n : Do n cycles of the tracking phase.
+-s, --nshiftmoves n : n global-shift moves per cycle
+-t, --trackedoutput filename : Write tracking statistics to filename
+-v, --verbose : verbose output
+-W, --write-each-cycle: write output file and tracking file every cycle
+-w, --nwinmoves n : n window-shift moves per cycle
+-X, --noautotrack : Stop after anneal (don't autotrack annealed clusters)
+-x, --betaincr value : at each anneal cycle, add value to beta
