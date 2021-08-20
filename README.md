@@ -81,10 +81,13 @@ The CLIPipe workflow consists of:
                   {pre_process,mapping,peak_calling}
    
    CLIPipe: A comprehensive quality control and analysis pipeline for CLIP highthroughput sequencing data
-   ==================================================================================
-   CLIPipe is a Python module and associated command-line interface (CLI), which provides all the commands needed to process protein-RNA CLIP interaction data and to identify and quantify sites of protein-RNA interactions on RNA.
+   =======================================================================================================
+   CLIPipe is a Python module and associated command-line interface (CLI), which provides all the
+   commands needed to process protein-RNA CLIP interaction data and to identify and quantify
+   sites of protein-RNA interactions on RNA.
    
-   CLIPipe's main input are FASTQ files with iCLIP sequencing data, its main output are BED files with identified and quantified cross-linked sites.
+   CLIPipe's main input are FASTQ files with iCLIP sequencing data, its main output are BED files
+   with identified and quantified cross-linked sites.
    
    A number of analyses are included in CLIPipe that provide insights into the properties of
    protein-RNA interaction.
@@ -97,7 +100,7 @@ The CLIPipe workflow consists of:
      --user_config_file USER_CONFIG_FILE, -u USER_CONFIG_FILE
                            the user config file
    
-   ==================================================================================
+   =======================================================================================================
    For additional help or support, please visit https://github.com/ShangZhang/clipipe
    ```
 
