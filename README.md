@@ -8,11 +8,7 @@ CLIPipe(CLIP-seq Pipeline) is an integrated pipeline for analyzing CLIP sequenci
 The CLIPipe workflow consists of:
 
 - Pre-processing function:
-  - Quality control of the raw CLIP-seq reads.
-  - Remove adapter of the sequencing data.
-  - Filter low quality reads of the sequencing data.
-  - Collpase duplicates of the sequencing data.
-  - Remove barcode of the sequencing data.
+  - Quality control, remove adapter, filter low quality reads, collpase duplicates, remove barcode of the raw CLIP-seq data.
 
 - Alignment function:
   - mapping sequencing data to reference genome using bowtie, bwa and novoalign
@@ -117,6 +113,34 @@ clipipe ${step_name} -d ${dataset}
 
 
 ## Usage
+
+You can use the provided demo data to run CLIPipe:
+
+```bash
+cp /home/CLIPipe_user/clipipe/demo/general ${workspace}
+```
+
+The demo data folder has the following structure:
+
+```
+./
+├── config
+|   ├── default_config.yaml
+│   └── user_config.yaml
+├── data
+|   ├── fastq/
+│   └── sample_ids.txt
+└── output
+    └── ...
+```
+
+> **Note:**
+>
+> - `config/default_config.yaml`: configuration file with additional detailed parameters for each step. The default file is not supposed to be changed unless you are very clear about what you are doing.
+> - `config/fastq/`: folder of raw CLIP-seq fastq file.
+> - `data/sample_ids.txt`: table of sample name information.
+> - `output/example/`: output folder.
+
 
 ### Pre-processing
 
