@@ -1,4 +1,6 @@
 [TOC]
+
+
 # CLIPipe
 
 CLIPipe(CLIP-seq Pipeline) is an integrated pipeline for analyzing CLIP sequencing data.
@@ -14,19 +16,28 @@ The CLIPipe workflow consists of:
   - Collpase duplicates of the sequencing data.
   - Remove barcode of the sequencing data.
 
-- Alignment function :
+- Alignment function:
   - mapping sequencing data to reference genome using bowtie, bwa and novoalign
 
-- Peak calling function :
+- Peak calling function:
   - Peak calling of the CLIP-seq data using Piranha, CTK, PureCLIP, iCLIPro, iCount, JAMM, PEAKachu, PeakRanger and clipcontext
 
-- Motif discovery function :
+- Motif discovery function:
   - Motif discovery of the CLIP-seq data using HOMER, PhyloGibbs, MEME, GraphProt, DREME and STREME
 
-## Tutorial
+Table of Contents:
 
-<iframe height='265' scrolling='no' title='CLIPipe Tutorial' src='https://clipipe.readthedocs.io/en/latest/' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
-
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Basic Usage](#basic-usage)
+- [Usage](#usage)
+  - [Pre-processing](#rre-processing)
+  - [Alignment](#alignment)
+  - [Peak calling](#peak-calling)
+  - [Motif discovery](#motif-discovery)
+- [Copyright and License Information](#copyright-and-license-information)
+- [Citation](#citation)
+- [Tutorial](tutorial/)
 
 ## Requirements
 ### software
@@ -34,7 +45,7 @@ The CLIPipe workflow consists of:
 
 ## Installation
 
-  1. All required software and packages are already installed in docker, so there are no more requirements. You can execute to get the docker `CLIPipe_v3` container:
+1. All required software and packages are already installed in docker, so there are no more requirements. You can execute to get the docker `CLIPipe_v3` container:
   
     ```bash
     docker run --name=CLIPipe_v3 -t -d -h CLIPipe_docker --restart unless-stopped -v /lulab/lustre2/zhangshang/work/software/clipipe:/home/CLIPipe_user/clipipe zs/clipipe:v1 /bin/bash
@@ -108,6 +119,11 @@ clipipe ${step_name} -d ${dataset}
 
 ### Pre-processing
 
+### Alignment
+
+### Peak calling
+
+### Motif discovery
 
 
 ## Copyright and License Information
