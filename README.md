@@ -1,27 +1,31 @@
-# RiboWave 
+# CLIPipe
 
-RiboWave is a funtional Ribo-seq analysis tool to identify translated ORF based on Ribo-seq data.
-
-
-The RiboWave workflow consists of:
+CLIPipe(CLIP-seq Pipeline) is an integrated pipeline for analyzing CLIP sequencing data.
 
 
-- Pre-processing :
-  - Create the annotation file for the subsequent analysis. [`create_annotation.sh`]
-  - Determine the P-site position of Ribo-seq. [`P-site_determination.sh`]
-  - Generate P-site tracks from Ribo-seq.[`create_track_Ribo.sh`]
+The CLIPipe workflow consists of:
 
-- Main function :
-  - Denoise [`Ribowave`]
-  - Predict translated ORFs [`Ribowave`]
-  - Estimate reads density for each given ORF [`Ribowave`]
-  - Estimate frameshift potential for each given ORF [`Ribowave`]
+
+- Pre-processing function:
+  - Quality control of the raw CLIP-seq reads.
+  - Remove adapter of the sequencing data.
+  - Filter low quality reads of the sequencing data.
+  - Collpase duplicates of the sequencing data.
+  - Remove barcode of the sequencing data.
+
+- Alignment function :
+  - mapping sequencing data to reference genome using bowtie, bwa and novoalign
+
+- Peak calling function :
+  - Peak calling of the CLIP-seq data using Piranha, CTK, PureCLIP, iCLIPro, iCount, JAMM, PEAKachu, PeakRanger and clipcontext
+
+- Motif discovery function :
+  - Motif discovery of the CLIP-seq data using HOMER, PhyloGibbs, MEME, GraphProt, DREME and STREME
 
 
 ## Requirements
 ### software
-* R 
-* bedtools v2.25.0 
+* docker
 
 ### R packages
 * reshape
@@ -32,7 +36,10 @@ The RiboWave workflow consists of:
 * parallel
 
 ## Before running 
-It is **recommanded** to make a new directory and move the `Ribo-seq bam file` into that directory;
+  1. All required software and packages are already installed in docker, so there are no more requirements. To test the installation and get information about the command-line interface of exSEEK, you can execute:
+    ```bash
+    docker run --name=CLIPipe_v3 -t -d -h CLIPipe_docker --restart unless-stopped -v /lulab/lustre2/zhangshang/work/software/clipipe:/home/CLIPipe_user/clipipe zs/clipipe:v1 /bin/bash
+    ```
 
 ## Pre-processing
 
