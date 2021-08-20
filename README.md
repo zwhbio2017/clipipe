@@ -1,5 +1,3 @@
-[TOC]
-
 
 # CLIPipe
 
@@ -25,7 +23,7 @@ The CLIPipe workflow consists of:
 - Motif discovery function:
   - Motif discovery of the CLIP-seq data using HOMER, PhyloGibbs, MEME, GraphProt, DREME and STREME
 
-Table of Contents:
+## Table of Contents:
 
 - [Requirements](#requirements)
 - [Installation](#installation)
@@ -40,7 +38,7 @@ Table of Contents:
 - [Tutorial](tutorial/)
 
 ## Requirements
-### software
+### Software
 * docker
 
 ## Installation
