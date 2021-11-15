@@ -24,8 +24,8 @@ rule all:
 
 rule peak_calling_pureclip:
     input:
-        bam_file='{output_dir}/bowtie_map/{sample_id}.bam',
-        bam_index='{output_dir}/bowtie_map/{sample_id}.bam.bai'
+        bam_file='{output_dir}/mapping_bowtie/{sample_id}.bam',
+        bam_index='{output_dir}/mapping_bowtie/{sample_id}.bam.bai'
     output:
         crosslink_site_file='{output_dir}/peak_calling_pureclip/{sample_id}_crosslink_site.bed',
         binding_region_file='{output_dir}/peak_calling_pureclip/{sample_id}_binding_region.bed'
