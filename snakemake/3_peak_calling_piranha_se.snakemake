@@ -7,7 +7,7 @@ summary_dir = config.get('summary_dir')
 
 def get_all_inputs(wildcards):
     available_inputs = dict(
-        piranha_file=expand('{output_dir}/peak_calling_piranha/{sample_id}.20nt.0.01.bed',output_dir=output_dir, sample_id=sample_ids),
+        piranha_file=expand('{output_dir}/peak_calling_piranha/{sample_id}.bed',output_dir=output_dir, sample_id=sample_ids),
     )
     enabled_inputs = list(available_inputs.keys())
     inputs = []
@@ -22,11 +22,15 @@ rule all:
 
 ###------------------------The output section---------------------------###
 
+## 模式使用的应该是20nt 0.01的参数
 rule peak_calling_piranha:
     input:
-        bed_file='{output_dir}/bowtie_map/{sample_id}.bed'
+        bed_file='{output_dir}/mapping_bowtie/{sample_id}.bed'
     output:
-        piranha_file='{output_dir}/peak_calling_piranha/{sample_id}.20nt.0.01.bed'
+        piranha_file='{output_dir}/peak_calling_piranha/{sample_id}.bed'
+    params:
+        piranha_bin_size_reponse=config.get('piranha_bin_size_reponse'),
+        piraha_p_threshold=config.get('piraha_p_threshold')
     # conda:
     #     "./envs/piranha.yaml"
     # threads: 
@@ -36,9 +40,9 @@ rule peak_calling_piranha:
     shell:
         '''Piranha \
                 -s \
-                -b 20 \
+                -b {params.piranha_bin_size_reponse} \
                 -d ZeroTruncatedNegativeBinomial \
-                -p 0.01 \
+                -p {params.piraha_p_threshold} \
                 {input.bed_file} \
                 -o {output.piranha_file}
         '''

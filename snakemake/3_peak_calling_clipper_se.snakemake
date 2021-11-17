@@ -24,19 +24,20 @@ rule all:
 
 rule peak_calling_clipper:
     input:
-        bam_file='{output_dir}/bowtie_map/{sample_id}.bam'
+        bam_file='{output_dir}/mapping_bowtie/{sample_id}.bam'
     output:
         clipper_file='{output_dir}/peak_calling_clipper/{sample_id}.txt'
     threads: 
         config.get('threads_compress')
+    # conda:
+    #     "./envs/quality_control.yaml"
     log:
         '{output_dir}/log/peak_calling_clipper/{sample_id}.log'
     shell:
-        '''conda activate clipper3; \
-            clipper \
+        '''/home/CLIPipe_user/bin/miniconda3/envs/clipper3/bin/clipper \
                     -b {input.bam_file} \
                     -s hg19 \
                     -o {output.clipper_file} \
                     --processors {threads}; \
-            conda activate clipipe
         '''
+    # conda activate clipipe

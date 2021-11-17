@@ -39,7 +39,7 @@ rule fastqc_raw:
     # conda:
     #     "./envs/quality_control.yaml"
     log:
-        '{output_dir}/log/quality_control_raw/fastqc/{sample_id}.log'
+        '{output_dir}/log/fastqc_raw/fastqc/{sample_id}.log'
     shell:
         ''' fastqc -f fastq -o {params.output_prefix} {input} > {log} 2>&1
         '''
@@ -61,7 +61,7 @@ rule multiqc_raw:
     # conda:
     #     "./envs/quality_control.yaml"
     log:
-        '{output_dir}/log/quality_control_raw/multiqc.log'
+        '{output_dir}/log/multiqc_raw/multiqc.log'
     shell:
         '''multiqc -f -m fastqc -o {params.multiqc_out_dir} {params.fastqc_dir} > {log} 2>&1
         '''

@@ -54,7 +54,7 @@ CLIPipe is a Python module and associated command-line interface (CLI), which pr
 commands needed to process protein-RNA CLIP interaction data and to identify and quantify
 sites of protein-RNA interactions on RNA.
 
-CLIPipe's main input are FASTQ files with iCLIP sequencing data, its main output are BED files
+CLIPipe's main input are FASTQ files with CLIP-seq data, its main output are BED files
 with identified and quantified cross-linked sites.
 
 A number of analyses are included in CLIPipe that provide insights into the properties of
@@ -149,7 +149,7 @@ For additional help or support, please visit https://github.com/ShangZhang/clipi
         snakefile = os.path.join(root_dir, 'snakemake', 'par_clip_pe.snakemake')
 
     # logging snakemake command
-    snakemake_args = ['-p', '-k', '--use-conda', '-j', '15', '--rerun-incomplete',
+    snakemake_args = ['-p', '-k', '--use-conda', '--conda-prefix', '/home/CLIPipe_user/', '-j', '15', '--rerun-incomplete',
                       '--latency-wait', '20', '--snakefile', snakefile, '--configfile', user_config_file]
     logger.debug('snakemake command: ' + str(snakemake_path) +
                  ' ' + str(snakemake_args))

@@ -31,7 +31,7 @@ rule mapping_bowtie:
     threads: 
         config.get('threads_mapping')
     log:
-        '{output_dir}/log/mapping_bowtie/{sample_id}.log'
+        '{output_dir}/log/mapping_bowtie/mapping_bowtie/{sample_id}.log'
     shell:
         '''bowtie \
             -f \
@@ -54,7 +54,7 @@ rule sam2bam:
     threads:
         config.get('threads_compress')
     log:
-        '{output_dir}/log/sam2bam/{sample_id}.log'
+        '{output_dir}/log/mapping_bowtie/sam2bam/{sample_id}.log'
     shell:
         '''samtools sort -@ {threads} {input.sam_file} > {output.bam_file}
         '''
@@ -68,7 +68,7 @@ rule bam_index:
     threads:
         config.get('threads_mapping')
     log:
-        '{output_dir}/log/bam_index/{sample_id}.log'
+        '{output_dir}/log/mapping_bowtie/bam_index/{sample_id}.log'
     shell:
         '''samtools index -@ {threads} {input.bam_file}
         '''
@@ -81,7 +81,7 @@ rule bam2bed:
     threads:
         config.get('threads_compress')
     log:
-        '{output_dir}/log/bam2bed/{sample_id}.log'
+        '{output_dir}/log/mapping_bowtie/bam2bed/{sample_id}.log'
     shell:
         '''bedtools bamtobed -i {input.bam_file} > {output.bed_file}
         '''
