@@ -25,7 +25,7 @@ rule bwa_aln:
     output:
         sai_file='{output_dir}/mapping_bwa/{sample_id}.sai'
     params:
-        reference_fasta=config.get('reference_dir') + '/hg19/bwa_index_hg19/hg19'
+        reference_fasta=config.get('reference_dir') + config.get('species') + '/bwa_index/' + config.get('species')
     threads: 
         config.get('threads_mapping')
     log:
@@ -45,8 +45,7 @@ rule bwa_samse:
     output:
         sam_file='{output_dir}/mapping_bwa/{sample_id}.sam.gz'
     params:
-        reference_fasta=config.get('reference_dir') + '/hg19/bwa_index_hg19/hg19'
-        
+        reference_fasta=config.get('reference_dir') + config.get('species') + '/bwa_index/' + config.get('species')  
     threads:
         config.get('threads_compress')
     log:

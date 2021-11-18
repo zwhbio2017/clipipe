@@ -1,9 +1,5 @@
-## 和别的peak calling方法不同，该方法直接从clean fastq file开始
-
-# 测试成功
 include: './0_common.snakemake'
 
-# root_dir = config.get('root_dir')
 output_dir = config.get("output_dir")
 summary_dir = config.get('summary_dir')
 
@@ -54,7 +50,7 @@ rule parclip_analysis:
         parclip_suit_cmd_dir=config.get('root_dir') + '/bin/parclip_suite/',
         parclip_suit_cmd=config.get('root_dir') + '/bin/parclip_suite/analyze_parclip.pl',
         file_name='{sample_id}',
-        reference_file=config.get('reference_dir2') + '/reference.conf',
+        reference_file=config.get('reference_dir') + config.get('species') + '/bowtie_index/reference.conf',
         parclip_analysis_dir='{output_dir}/peak_calling_parclip_suite/parclip_analysis'
     threads: 
         config.get('threads_compress')

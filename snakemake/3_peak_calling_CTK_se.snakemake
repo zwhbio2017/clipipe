@@ -1,5 +1,3 @@
-## 初略写完，尚未运行检查！！！！！！
-
 include: './0_common.snakemake'
 
 output_dir = config.get("output_dir")
@@ -25,7 +23,7 @@ rule all:
 
 rule convert_novoalign_file_to_tag_bed:
     input:
-        novoalign_mapping_file='{output_dir}/novoalign_map/{sample_id}.novoalign'
+        novoalign_mapping_file='{output_dir}/mapping_novoalign/{sample_id}.novoalign'
     output:
         ctk_bed_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.bed',
         ctk_mutation_bed_file='{output_dir}/peak_calling_CTK/{sample_id}.mutation.bed'
@@ -70,8 +68,6 @@ rule join_mutation_with_tag_bed:
         ctk_mutation_uniq_bed_file='{output_dir}/peak_calling_CTK/{sample_id}.tag.uniq.mutation.bed'
     threads:
         config.get('threads_compress')
-    # conda:
-    #     "./envs/python2.7.yaml"
     log:
         '{output_dir}/log/peak_calling_CTK/{sample_id}.log'
     shell:

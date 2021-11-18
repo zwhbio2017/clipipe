@@ -141,7 +141,7 @@ For additional help or support, please visit https://github.com/ShangZhang/clipi
             snakefile = os.path.join(root_dir, 'snakemake', '3_peak_calling_CTK_se.snakemake')
         elif not config['paired_end'] and config['peak_caller'] == 'CTK_par_clip':
             snakefile = os.path.join(root_dir, 'snakemake', '3_peak_calling_CTK_par_clip_se.snakemake')
-        elif not config['paired_end'] and config['peak_caller'] == 'parclip_suit':
+        elif not config['paired_end'] and config['peak_caller'] == 'parclip_suite':
             snakefile = os.path.join(root_dir, 'snakemake', '3_peak_calling_parclip_suite_se.snakemake')
     
     # 按照CLIP不同的方法来执行
@@ -149,7 +149,7 @@ For additional help or support, please visit https://github.com/ShangZhang/clipi
         snakefile = os.path.join(root_dir, 'snakemake', 'par_clip_pe.snakemake')
 
     # logging snakemake command
-    snakemake_args = ['-p', '-k', '--use-conda', '--conda-prefix', '/home/CLIPipe_user/', '-j', '15', '--rerun-incomplete',
+    snakemake_args = ['-p', '-k', '--use-conda', '--conda-prefix', '/home/CLIPipe_user/', '-j', '9', '--rerun-incomplete',
                       '--latency-wait', '20', '--snakefile', snakefile, '--configfile', user_config_file]
     logger.debug('snakemake command: ' + str(snakemake_path) +
                  ' ' + str(snakemake_args))

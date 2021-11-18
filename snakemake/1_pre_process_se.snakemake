@@ -36,8 +36,6 @@ rule fastqc_raw:
         output_prefix='{output_dir}/fastqc_raw/',
     threads:
         1
-    # conda:
-    #     "./envs/quality_control.yaml"
     log:
         '{output_dir}/log/fastqc_raw/fastqc/{sample_id}.log'
     shell:
@@ -58,8 +56,6 @@ rule multiqc_raw:
         multiqc_out_dir='{output_dir}/multiqc_raw'
     threads:
         1
-    # conda:
-    #     "./envs/quality_control.yaml"
     log:
         '{output_dir}/log/multiqc_raw/multiqc.log'
     shell:
@@ -75,8 +71,6 @@ rule clip_adapter:
         adapter=config.get('adapter1')
     threads: 
         config.get('threads_compress')
-    # conda:
-    #     "./envs/pre_process.yaml"
     log:
         '{output_dir}/log/pre_process/clip_adapter_{sample_id}.log'
     shell:
@@ -96,8 +90,6 @@ rule filter_quality:
         fastq='{output_dir}/pre_process/{sample_id}.clipped.filtered.fastq',
     threads: 
         config.get('threads_compress')
-    # conda:
-    #     "./envs/pre_process.yaml"
     log:
         '{output_dir}/log/pre_process/filter_quality_{sample_id}.log'
     shell:
@@ -117,8 +109,6 @@ rule collapse_duplicate:
         fastq='{output_dir}/pre_process/{sample_id}.clipped.filtered.collapsed.fa',
     threads: 
         config.get('threads_compress')
-    # conda:
-    #     "./envs/pre_process.yaml"
     log:
         '{output_dir}/log/pre_process/collapse_duplicate_{sample_id}.log'
     shell:
@@ -139,8 +129,6 @@ rule barcode_removal:
         barcode_length=config.get('barcode_length')
     threads: 
         config.get('threads_compress')
-    # conda:
-    #     "./envs/pre_process.yaml"
     log:
         '{output_dir}/log/pre_process/barcode_removal_{sample_id}.log'
     shell:

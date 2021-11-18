@@ -27,7 +27,7 @@ rule mapping_bowtie:
     output:
         sam='{output_dir}/mapping_bowtie/{sample_id}.sam'
     params:
-        bowtie1_index=config.get('reference_dir') + '/hg19/bowtie_index_hg19/Human_hg19'
+        bowtie1_index=config.get('reference_dir') + config.get('species') + '/bowtie_index/' + config.get('species')
     threads: 
         config.get('threads_mapping')
     log:

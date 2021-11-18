@@ -1,4 +1,3 @@
-# 测试成功
 include: './0_common.snakemake'
 
 output_dir = config.get("output_dir")
@@ -30,9 +29,7 @@ rule peak_calling_pureclip:
         crosslink_site_file='{output_dir}/peak_calling_pureclip/{sample_id}_crosslink_site.bed',
         binding_region_file='{output_dir}/peak_calling_pureclip/{sample_id}_binding_region.bed'
     params:
-        genome_fasta=config.get('reference_dir') + '/hg19/GRCh37.p13.genome.fa',
-    # conda:
-    #     "./envs/pureclip.yaml"
+        genome_fasta=config.get('reference_dir') + config.get('species') + '/bwa_index/' + config.get('species') + '.fa',
     threads: 
         config.get('threads_mapping')
     log:

@@ -1,5 +1,4 @@
-## 现阶段尚未完成：主要原因是clipper软件安装时不报错，运行的时候命令和温昂中提供的不一致
-
+## not finish and not use
 include: './0_common.snakemake'
 
 output_dir = config.get("output_dir")
@@ -29,8 +28,6 @@ rule peak_calling_clipper:
         clipper_file='{output_dir}/peak_calling_clipper/{sample_id}.txt'
     threads: 
         config.get('threads_compress')
-    # conda:
-    #     "./envs/quality_control.yaml"
     log:
         '{output_dir}/log/peak_calling_clipper/{sample_id}.log'
     shell:

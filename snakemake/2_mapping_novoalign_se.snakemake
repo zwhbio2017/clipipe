@@ -27,9 +27,7 @@ rule mapping_novoalign:
         mapping_novoalign_file='{output_dir}/mapping_novoalign/{sample_id}.novoalign'
     params:
         novoalign=config.get('root_dir') + '/bin/novocraft/novoalign',
-        novoalign_index=config.get('reference_dir') + '/novoalign_index/human_genome_hg19'
-    # threads: 
-    #     1
+        novoalign_index=config.get('reference_dir') + config.get('species') + '/novoalign_index/' + config.get('species') + '_index'
     log:
         '{output_dir}/log/mapping_novoalign/{sample_id}.log'
     shell:

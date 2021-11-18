@@ -1,5 +1,3 @@
-
-## 测试成功
 include: './0_common.snakemake'
 
 output_dir = config.get("output_dir")
@@ -22,7 +20,6 @@ rule all:
 
 ###------------------------The output section---------------------------###
 
-## 模式使用的应该是20nt 0.01的参数
 rule peak_calling_piranha:
     input:
         bed_file='{output_dir}/mapping_bowtie/{sample_id}.bed'
@@ -31,10 +28,6 @@ rule peak_calling_piranha:
     params:
         piranha_bin_size_reponse=config.get('piranha_bin_size_reponse'),
         piraha_p_threshold=config.get('piraha_p_threshold')
-    # conda:
-    #     "./envs/piranha.yaml"
-    # threads: 
-    #     config.get('threads_compress')
     log:
         '{output_dir}/log/peak_calling_piranha/{sample_id}.log'
     shell:
