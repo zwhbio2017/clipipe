@@ -46,7 +46,6 @@ rule fastqc_raw:
         ''' fastqc -f fastq -o {params.output_prefix} {input} > {log} 2>&1
         '''
 
-
 rule multiqc_raw:
     input:
         fastqc=expand('{output_dir}/fastqc_raw/{sample_id}_fastqc.zip',
@@ -80,7 +79,6 @@ rule fastq2fasta:
     shell:
         '''root_dir/parclip_suite/fastq2fasta.pl {input.raw_fastq} > {output.raw_fasta}
         '''
-
 
 rule cut_adapter:
     input:

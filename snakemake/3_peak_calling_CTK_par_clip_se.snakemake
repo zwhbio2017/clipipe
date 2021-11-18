@@ -43,7 +43,6 @@ rule parsing_sam_file:
             {input.sam_file} - | gzip -c > {output.bed_file}
         '''
 
-
 rule collapse_PCR_duplicate:
     input:
         ctk_bed_file='{output_dir}/CTK/{sample_id}.tag.bed.gz'
@@ -117,8 +116,6 @@ rule concatenate_bed_file:
         cat {input.ctk_mutation_uniq_bed_file} > {output.cat_ctk_mutation_uniq_bed_file}
         '''
 
-
-
 rule peak_calling_with_no_statistical_significance:
     input:
         ctk_uniq_rgb_bed='{output_dir}/CTK/{sample_id}.tag.uniq.rgb.bed'
@@ -155,7 +152,6 @@ rule peak_calling_with_statistical_significance:
             --out-half-PH {output.halfPH_bed}
         '''
 
-
 rule get_specific_types_of_mutations:
     input:
         ctk_mutation_uniq_bed_file='{output_dir}/CTK/{sample_id}.tag.uniq.mutation.bed'
@@ -173,7 +169,6 @@ rule get_specific_types_of_mutations:
             perl {root_dir}/bin/ctk/getMutationType.pl -t ins {input.ctk_mutation_uniq_bed_file} {output.ctk_ins_bed_file};
             perl {root_dir}/bin/ctk/getMutationType.pl -t t2c {input.ctk_mutation_uniq_bed_file} {output.ctk_t2c_bed_file} --summary {output.mutation_stat_file};
         '''
-
 
 rule CIMS_get_peaks_del:
     input:
@@ -226,28 +221,3 @@ rule CIMS_get_peaks_t2c:
         '''awk '{{if($9<=0.05) {{print $0}}}}' {input.ctk_t2c_bed_file} | sort -k 9,9n -k 8,8nr -k 7,7n > {output.ctk_t2c_bed_s13_txt};
             cut -f 1-6 {output.ctk_t2c_bed_s13_txt} > {output.ctk_t2c_bed_s13_bed}
         '''
-
-# rule :
-#     input:
-
-#     output:
-
-#     threads:
-
-#     log:
-
-#     shell:
-
-
-
-# rule :
-#     input:
-
-#     output:
-
-#     threads:
-
-#     log:
-
-#     shell:
-

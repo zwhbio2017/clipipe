@@ -7,7 +7,7 @@
 # ---------------------------
 # @author: Shang Zhang
 # @email: shang_zhang@foxmail.com
-# @date: Nov, 15th, 2021
+# @date: Nov, 18th, 2021
 # ---------------------------
 
 import _locale
@@ -27,10 +27,6 @@ if __name__ == '__main__':
     import os
     import yaml
     import shutil
-
-    # 设置编码问题
-    # reload(sys)
-    # sys.setdefaultencoding('utf-8')
 
     # set logging
     logging.basicConfig(
@@ -70,7 +66,6 @@ For additional help or support, please visit https://github.com/ShangZhang/clipi
     parser.add_argument('step', type=str, choices=steps)
     parser.add_argument('--user_config_file', '-u', type=str, required=True,
                         help='the user config file')
-    # type: class 'argparse.Namespace' 将parser中设置的所有“add_argument”返回给args子类实例；parser中增加的属性内容都会在args实例中，使用即可。
     args = parser.parse_args()
 
     # set config
@@ -144,7 +139,7 @@ For additional help or support, please visit https://github.com/ShangZhang/clipi
         elif not config['paired_end'] and config['peak_caller'] == 'parclip_suite':
             snakefile = os.path.join(root_dir, 'snakemake', '3_peak_calling_parclip_suite_se.snakemake')
     
-    # 按照CLIP不同的方法来执行
+    # based on different CLIP-seq methods
     elif args.step == 'PAR-CLIP':
         snakefile = os.path.join(root_dir, 'snakemake', 'par_clip_pe.snakemake')
 

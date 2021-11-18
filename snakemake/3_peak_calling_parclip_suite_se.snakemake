@@ -20,7 +20,6 @@ rule all:
 
 ###------------------------The output section---------------------------###
 
-
 rule pre_process_fasta_file:
     input:
         clean_fastq='{output_dir}/pre_process/{sample_id}.clipped.filtered.fastq'
@@ -39,7 +38,6 @@ rule pre_process_fasta_file:
         '''cd {params.parclip_suit_cmd_dir}; {params.parclip_suit_cmd} \
             {input.clean_fastq} {params.file_name} {params.prepare_fasta_dir}
         '''
-
 
 rule parclip_analysis:
     input:

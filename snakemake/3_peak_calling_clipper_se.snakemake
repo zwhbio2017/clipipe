@@ -37,4 +37,3 @@ rule peak_calling_clipper:
                     -o {output.clipper_file} \
                     --processors {threads}; \
         '''
-    # conda activate clipipe

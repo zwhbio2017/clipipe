@@ -59,7 +59,6 @@ rule sam2bam:
         '''samtools sort -@ {threads} {input.sam_file} > {output.bam_file}
         '''
 
-
 rule bam_index:
     input:
         bam_file='{output_dir}/mapping_bowtie/{sample_id}.bam'
