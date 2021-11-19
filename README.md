@@ -1,7 +1,7 @@
 
 # CLIPipe
 
-CLIPipe(CLIP-seq Pipeline) is an integrated pipeline for analyzing CLIP sequencing data.
+CLIPipe is an integrated pipeline for analyzing CLIP sequencing data.
 
 ![Pipeline of Tutorial](tutorial/CLIPipe_pipeline.png)
 
