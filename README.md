@@ -47,13 +47,13 @@ All required software and packages are already installed in docker, so there are
 
 #### Prepare reference demo and docker
 
-1. Download the reference and demo data to directory, and unzip
+1. Download the reference, demo data, and CLIPipe docker to directory, and unzip
 
          mkdir clipipe_test;
          cd clipipe_test;
-         wget ;
-         wget ;
-         wget ;
+         wget http://postar.ncrnalab.org/software/clipipe_ref.tar.gz;
+         wget http://postar.ncrnalab.org/software/clipipe_demo.tar.gz;
+         wget http://postar.ncrnalab.org/software/CLIPipe_v1.0.2_.tar.gz;
          tar -xvzf clipipe_ref.tar.gz;
          tar -xvzf clipipe_demo.tar.gz;
 
