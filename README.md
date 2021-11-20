@@ -51,9 +51,9 @@ All required software and packages are already installed in docker, so there are
 
          mkdir clipipe_test;
          cd clipipe_test;
-         wget http://postar.ncrnalab.org/software/clipipe_ref.tar.gz;
-         wget http://postar.ncrnalab.org/software/clipipe_demo.tar.gz;
-         wget http://postar.ncrnalab.org/software/CLIPipe_v1.0.2_.tar.gz;
+         wget http://clipipe.ncrnalab.org/clipipe_ref.tar.gz;
+         wget http://clipipe.ncrnalab.org/clipipe_demo.tar.gz;
+         wget http://clipipe.ncrnalab.org/CLIPipe_v1.0.2_.tar.gz;
          tar -xvzf clipipe_ref.tar.gz;
          tar -xvzf clipipe_demo.tar.gz;
 
