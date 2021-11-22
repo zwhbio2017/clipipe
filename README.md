@@ -1,23 +1,20 @@
 
 # CLIPipe
 
-CLIPipe is an integrated pipeline for analyzing CLIP sequencing data.
+CLIPipe is an integrated pipeline for analyzing CLIP sequencing data. It provides all the commands needed to process CLIP-seq data, and it could identify and quantify sites of protein-RNA interactions on RNA from CLIP-seq data.
 
 ![Pipeline of Tutorial](tutorial/CLIPipe_pipeline.png)
 
 The CLIPipe workflow consists of:
 
-- Pre-processing function:
-  - Quality control, remove adapter, filter low quality reads, collpase duplicates, remove barcode of the raw CLIP-seq data.
-
-- Alignment function:
-  - mapping sequencing data to reference genome using bowtie, bwa and novoalign
-
-- Peak calling function:
-  - Peak calling of the CLIP-seq data using Piranha, CTK, PureCLIP, iCLIPro, iCount, JAMM, PEAKachu, PeakRanger and clipcontext
-
-- Motif discovery function:
-  - Motif discovery of the CLIP-seq data using HOMER, PhyloGibbs, MEME, GraphProt, DREME and STREME
+-   Pre-processing function:
+    -   Quality control, adapter removal, low-quality reads filtering, duplicates collapsing, and barcode removal of the raw CLIP-seq data.
+-   Alignment function:
+    -   Mapping pre-processed data to reference genome using bowtie, bwa, and novoalign
+-   Peak calling function:
+    -   Binding peak enrichment using Piranha, CTK, PureCLIP, iCLIPro, iCount, JAMM, PEAKachu, PeakRanger, and clipcontext
+-   Motif discovery function:
+    -   Motif discovery of the binding regions using HOMER, PhyloGibbs, MEME, GraphProt, DREME and STREME
 
 ## Table of Contents:
 
@@ -36,10 +33,10 @@ The CLIPipe workflow consists of:
 ## Requirements
 
 ### Software
-
-All required software and packages are already installed in docker, so there are no more requirements. You just need to install docker.
+All required software and packages are already installed in the docker, so there are no more requirements. You just need to install docker.
 
 -   docker
+
 
 ## Installation
 
@@ -59,20 +56,20 @@ All required software and packages are already installed in docker, so there are
 
 #### Run CLIPipe Docker
 
-1.  [Docker](https://www.docker.com/) provides an easy way to run CLIPipe in a working environment that is completely separated from your host machine. All required software and packages are already installed in a ready-to-use image of CLIPipe docker, so there are no more requirements. you can use the docker image we provide: [CLIPipe Docker Image](https://hub.docker.com/). You can execute to get the docker `CLIPipe_1.0.X` container:
+1.  [Docker](https://www.docker.com/) provides an easy way to run CLIPipe in a working environment that is completely separated from your host machine. All required software and packages are already installed in a ready-to-use image of CLIPipe docker, so there are no more requirements. You can use the docker image we provide: [CLIPipe Docker Image](https://hub.docker.com/). And you may execute these commands to get the docker `CLIPipe_1.0.X` container:
          
          cd clipipe_test;
          docker import CLIPipe_v1.0.2_.tar.gz zs/clipipe:1.0.2_test     ##import the docker
 
          docker run --name=CLIPipe_1.0.2_test -t -d -h CLIPipe_docker --restart unless-stopped -v <the-absolute-path-of-current-directory>:/home/CLIPipe_user/clipipe zs/clipipe:1.0.2_test /bin/bash
 
-    -   Make sure to create a local folder and provide the path to it. The example above uses a path that may not be applicable to your computer. Both, path to the folder on the host machine and path within the container (`/home/CLIPipe_user/clipipe`), must be absolute.
+    -   Make sure to create a local folder and provide the path to it. The example above uses a path that may not be applicable to your setup. Both, path to the folder on the host machine and path within the container (`/home/CLIPipe_user/clipipe`) must be absolute.
 
-2.  To show the docker `CLIPipe_1.0.2_test` container, you can execute:
+2.  To show the docker container `CLIPipe_1.0.2_test`, you can execute:
 
          docker container ls
 
-3.  To execute the `CLIPipe_1.0.2_test` container, you can execute:
+3.  To execute the contianer `CLIPipe_1.0.2_test`, you can execute:
 
          docker exec -it CLIPipe_1.0.2_test bash
 
@@ -114,7 +111,7 @@ All required software and packages are already installed in docker, so there are
 
 ### Use from source
 
-We have hide the details of each step which write by [Snakemake](https://snakemake.readthedocs.io/en/stable/) and you only need to run one single command. However you can use some of the codes if you are familiar with snakemake. The source code is [here](https://github.com/ShangZhang/clipipe).
+We have hide the details of each step using [Snakemake](https://snakemake.readthedocs.io/en/stable/) and you only need to run one single command. However, you can use some of the codes if you are familiar with snakemake. The source code is [here](https://github.com/ShangZhang/clipipe).
 
 ## Basic Usage
 The basic usage of CLIPipe is:
@@ -131,7 +128,7 @@ clipipe ${step_name} -d ${dataset}
 
 ### Reference data
 
-You can use the provided reference file to run CLIPipe, defaultly you can choose from Human_hg19 Human_hg38 Mouse_mm10 and Mouse_mm39, you can also create your own reference based on examples we provided
+You can use the provided reference file to run CLIPipe. Defaultly you may choose from hg19/hg38 (Human) or mm10/mm39 (Mouse). You can also create your own reference based on examples we provided.
 
 ```bash
 ls /home/CLIPipe_user/clipipe/clipipe_ref/
@@ -320,7 +317,7 @@ Note:
     The output folders `output_human_hg38/peak_calling_parclip_suite/` contain alignment results using parclip_suite.
 ```
 
-Several peak calling tools can be used in the CLIPipe docker directily:
+Several other peak calling tools can be used in the CLIPipe docker directily:
 
 ```bash
 # iCLIPro
@@ -389,7 +386,7 @@ fimo --thresh 0.01 -o FIMO_output meme.txt ${sample_id}.test_peak.fa; # the numb
 
 ```
 
-Other related tools are provided
+Other related tools are also provided:
 
 ```bash
 # PhyloGibbs
@@ -404,5 +401,3 @@ $ streme [options]
 Copyright (C) 2021 Tsinghua University, Beijing, China
 
 This program is licensed with commercial restriction use license. Please see the [LICENSE](https://github.com/ShangZhang/clipipe/blob/main/LICENSE) file for details.
-
-
