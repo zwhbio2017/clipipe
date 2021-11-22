@@ -56,7 +56,7 @@ All required software and packages are already installed in the docker, so there
 
 #### Run CLIPipe Docker
 
-1.  [Docker](https://www.docker.com/) provides an easy way to run CLIPipe in a working environment that is completely separated from your host machine. All required software and packages are already installed in a ready-to-use image of CLIPipe docker, so there are no more requirements. You can use the docker image we provide: [CLIPipe Docker Image](https://hub.docker.com/). And you may execute these commands to get the docker `CLIPipe_1.0.X` container:
+1.  [Docker](https://www.docker.com/) provides an easy way to run CLIPipe in a working environment that is completely separated from your host machine. All required software and packages are already installed in a ready-to-use image of CLIPipe docker, so there are no more requirements. You can use the docker image we provide: [CLIPipe Docker Image](https://hub.docker.com/repository/docker/shangzhang/clipipe). And you may execute these commands to get the docker `CLIPipe_1.0.X` container:
          
          cd clipipe_test;
          docker import CLIPipe_v1.0.2_.tar.gz zs/clipipe:1.0.2_test     ##import the docker
@@ -200,7 +200,7 @@ read_length: 100
 
 ### Pre-processing
 
-CLIPipe provides pre-process step for raw CLIP-seq data. You needs to set up the `config/user_config.yaml` file correctly. The other parameters for pre-process step can be found in `config/default_config.yaml`.
+CLIPipe provides pre-process step for raw CLIP-seq data. You need to set up the `config/user_config.yaml` file correctly. The other parameters for pre-process step can be found in `config/default_config.yaml`.
 
 ```bash
 cd /home/CLIPipe_user/clipipe/clipipe_demo/general/;
@@ -341,7 +341,7 @@ $ clipcontext [-h] [-v] {g2t,t2g,lst,int,exb,eir} ...
 
 ### Motif discovery
 
-The motif discovery function can be used directily in the CLIPipe docker:
+The motif discovery function can be used directly in the CLIPipe docker:
 
 For HOMER, the demo script like this:
 
