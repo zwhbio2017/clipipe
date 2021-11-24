@@ -93,7 +93,7 @@ All required software and packages are already installed in the docker, so there
          commands needed to process protein-RNA CLIP interaction data and to identify and quantify
          sites of protein-RNA interactions on RNA.
 
-         CLIPipe's main input are FASTQ files with iCLIP sequencing data, its main output are BED files
+         CLIPipe's main input are FASTQ files with CLIP-seq data, its main output are BED files
          with identified and quantified cross-linked sites.
 
          A number of analyses are included in CLIPipe that provide insights into the properties of
@@ -128,7 +128,7 @@ clipipe ${step_name} -d ${dataset}
 
 ### Reference data
 
-You can use the provided reference file to run CLIPipe. Defaultly you may choose from hg19/hg38 (Human) or mm10/mm39 (Mouse). You can also create your own reference based on examples we provided.
+You could use the provided reference file to run CLIPipe. Defaultly you may choose from hg19/hg38 (human) and mm10/mm39 (mouse). You can also create your own reference based on the scripts that we provided.
 
 ```bash
 ls /home/CLIPipe_user/clipipe/clipipe_ref/
