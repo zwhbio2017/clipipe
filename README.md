@@ -271,7 +271,7 @@ CLIPipe provides multiple peak calling methods for identifying recurring fragmen
     </tr>
     <tr>
         <td>BrdU-CLIP</td>
-        <td>PureCLIP, iCLIPro,  iCount</td>
+        <td>CTK, PureCLIP, iCLIPro,  iCount</td>
     </tr>
     <tr>
         <td>Fr-iCLIP</td>
