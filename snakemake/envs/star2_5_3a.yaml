@@ -1,5 +1,0 @@
-channels:
-  - soil
-
-dependencies:
-  - star=2.5.3a

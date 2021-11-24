@@ -67,7 +67,9 @@ rule clip_adapter:
     output:
         fastq='{output_dir}/pre_process/{sample_id}.clipped.fastq',
     params:
-        adapter=config.get('adapter1')
+        adapter=config.get('adapter1'),
+        least_length_after_adapter_removal=config.get('least_length_after_adapter_removal'),
+        quality_score_format=config.get('quality_score_format')
     threads: 
         config.get('threads_compress')
     log:
@@ -75,8 +77,8 @@ rule clip_adapter:
     shell:
         '''fastx_clipper \
             -a {params.adapter} \
-            -l 13 \
-            -Q 33 \
+            -l {params.least_length_after_adapter_removal} \
+            -Q {params.quality_score_format} \
             -v \
             -i {input.fastq} \
             -o {output.fastq}
@@ -87,15 +89,19 @@ rule filter_quality:
         fastq='{output_dir}/pre_process/{sample_id}.clipped.fastq',
     output:
         fastq='{output_dir}/pre_process/{sample_id}.clipped.filtered.fastq',
+    params:
+        quality_cutoff_for_filtering=config.get('quality_cutoff_for_filtering'),
+        least_percent_of_high_quality_keep=config.get('least_percent_of_high_quality_keep'),
+        quality_score_format=config.get('quality_score_format')
     threads: 
         config.get('threads_compress')
     log:
         '{output_dir}/log/pre_process/filter_quality_{sample_id}.log'
     shell:
         '''fastq_quality_filter \
-            -q 20 \
-            -p 80 \
-            -Q 33 \
+            -q {params.quality_cutoff_for_filtering} \
+            -p {params.least_percent_of_high_quality_keep} \
+            -Q {params.quality_score_format} \
             -v \
             -i {input.fastq} \
             -o {output.fastq}
@@ -106,13 +112,15 @@ rule collapse_duplicate:
         fastq='{output_dir}/pre_process/{sample_id}.clipped.filtered.fastq',
     output:
         fastq='{output_dir}/pre_process/{sample_id}.clipped.filtered.collapsed.fa',
+    params:
+        quality_score_format=config.get('quality_score_format')
     threads: 
         config.get('threads_compress')
     log:
         '{output_dir}/log/pre_process/collapse_duplicate_{sample_id}.log'
     shell:
         '''fastx_collapser \
-            -Q 33 \
+            -Q {params.quality_score_format} \
             -v \
             -i {input.fastq} \
             -o {output.fastq}

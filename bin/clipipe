@@ -138,10 +138,6 @@ For additional help or support, please visit https://github.com/ShangZhang/clipi
             snakefile = os.path.join(root_dir, 'snakemake', '3_peak_calling_CTK_par_clip_se.snakemake')
         elif not config['paired_end'] and config['peak_caller'] == 'parclip_suite':
             snakefile = os.path.join(root_dir, 'snakemake', '3_peak_calling_parclip_suite_se.snakemake')
-    
-    # based on different CLIP-seq methods
-    elif args.step == 'PAR-CLIP':
-        snakefile = os.path.join(root_dir, 'snakemake', 'par_clip_pe.snakemake')
 
     # logging snakemake command
     snakemake_args = ['-p', '-k', '--use-conda', '--conda-prefix', '/home/CLIPipe_user/', '-j', '9', '--rerun-incomplete',

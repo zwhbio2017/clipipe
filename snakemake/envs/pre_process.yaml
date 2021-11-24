@@ -1,6 +1,0 @@
-channels:
- - bioconda
- - conda-forge
-dependencies:
- - fastx_toolkit=0.0.14
- - pigz=2.3.4

@@ -12,7 +12,7 @@ The CLIPipe workflow consists of:
 -   Alignment function:
     -   Mapping pre-processed data to reference genome using bowtie, bwa, and novoalign
 -   Peak calling function:
-    -   Binding peak enrichment using Piranha, CTK, PureCLIP, iCLIPro, iCount, JAMM, PEAKachu, PeakRanger, and clipcontext
+    -   Binding peak enrichment using Piranha, CTK, PureCLIP, iCLIPro, iCount, JAMM, PeakRanger, and clipcontext
 -   Motif discovery function:
     -   Motif discovery of the binding regions using HOMER, PhyloGibbs, MEME, GraphProt, DREME and STREME
 
@@ -291,7 +291,7 @@ CLIPipe provides multiple peak calling methods for identifying recurring fragmen
     </tr>
     <tr>
         <td>uvCLAP</td>
-        <td>JAMM, PEAKachu</td>
+        <td>JAMM</td>
     </tr>
     <tr>
         <td>FLASH</td>
@@ -328,9 +328,6 @@ $ iCount [-h] [-v] ...
 
 # JAMM
 $ JAMM.sh --help
-
-# PEAKachu
-$ peakachu [-h] [--version] {window,adaptive,coverage,consensus_peak} ...
 
 # PeakRanger
 $ peakranger <command> <arguments>

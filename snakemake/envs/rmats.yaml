@@ -1,4 +1,0 @@
-channels:
- - bioconda
-dependencies:
- - rmats=4.1.0

@@ -1,4 +1,0 @@
-channels:
- - bioconda
-dependencies:
- - piranha=1.2.1

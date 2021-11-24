@@ -1,9 +1,0 @@
-channel:
-  - conda-forge
-  - bioconda
-  - auto
-dependencies:
-  - python=2.7
-  - numpy
-  # - multiprocessing
-  - biopython
