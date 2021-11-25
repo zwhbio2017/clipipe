@@ -50,7 +50,7 @@ All required software and packages are already installed in the docker, so there
          cd clipipe_test;
          wget http://clipipe.ncrnalab.org/clipipe_ref.tar.gz;
          wget http://clipipe.ncrnalab.org/clipipe_demo.tar.gz;
-         wget http://clipipe.ncrnalab.org/CLIPipe_v1.0.2_.tar.gz;
+         wget http://clipipe.ncrnalab.org/CLIPipe_v1.0.3_.tar.gz;
          tar -xvzf clipipe_ref.tar.gz;
          tar -xvzf clipipe_demo.tar.gz;
 
@@ -59,19 +59,23 @@ All required software and packages are already installed in the docker, so there
 1.  [Docker](https://www.docker.com/) provides an easy way to run CLIPipe in a working environment that is completely separated from your host machine. All required software and packages are already installed in a ready-to-use image of CLIPipe docker, so there are no more requirements. You can use the docker image we provide: [CLIPipe Docker Image](https://hub.docker.com/repository/docker/shangzhang/clipipe). And you may execute these commands to get the docker `CLIPipe_1.0.X` container:
          
          cd clipipe_test;
-         docker import CLIPipe_v1.0.2_.tar.gz zs/clipipe:1.0.2_test     ##import the docker
+         docker import CLIPipe_v1.0.3_.tar.gz zs/clipipe:1.0.3_test     ##import the docker
 
-         docker run --name=CLIPipe_1.0.2_test -t -d -h CLIPipe_docker --restart unless-stopped -v <the-absolute-path-of-current-directory>:/home/CLIPipe_user/clipipe zs/clipipe:1.0.2_test /bin/bash
+         docker run --name=CLIPipe_1.0.3_test -t -d -h CLIPipe_docker --restart unless-stopped -v <the-absolute-path-of-current-directory>:/home/CLIPipe_user/clipipe zs/clipipe:1.0.3_test /bin/bash
 
     -   Make sure to create a local folder and provide the path to it. The example above uses a path that may not be applicable to your setup. Both, path to the folder on the host machine and path within the container (`/home/CLIPipe_user/clipipe`) must be absolute.
 
-2.  To show the docker container `CLIPipe_1.0.2_test`, you can execute:
+2.  To show the docker container `CLIPipe_1.0.3_test`, you can execute:
 
          docker container ls
 
-3.  To execute the contianer `CLIPipe_1.0.2_test`, you can execute:
+3.  To execute the contianer `CLIPipe_1.0.3_test`, you can execute:
 
-         docker exec -it CLIPipe_1.0.2_test bash
+         docker exec -it CLIPipe_1.0.3_test bash
+
+         cd /home/CLIPipe_user/clipipe;
+         find clipipe_demo  -type d  -exec chmod 777 {} \;
+         find clipipe_demo  -type f -exec chmod 666 {} \;
 
 4.  After entering the container, please change the user to `CLIPipe_user`
 
