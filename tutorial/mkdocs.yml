@@ -1,0 +1,13 @@
+site_name: CLIPipe
+theme: readthedocs
+repo_url: https://github.com/ShangZhang/clipipe
+copyright: shang_zhang@foxmail.com
+
+nav:
+    - Home: index.md
+    - Requirements: 1_requirement.md
+    - Installation: 2_installation.md
+    - Basic Usage: 3_basic_usage.md
+    - Usage: 4_usage.md
+    - Frequently asked questions: 5_faq.md
+    - Copyright and License: 6_copyright_and_license.md
