@@ -125,39 +125,39 @@ CLIPipe provides multiple peak calling methods for identifying recurring fragmen
     </tr>
     <tr>
         <td>iCLIP</td>
-        <td>PureCLIP, iCLIPro,  iCount</td>
+        <td>PureCLIP, iCLIPro, iCount</td>
     </tr>
     <tr>
         <td>iCLAP</td>
-        <td>PureCLIP, iCLIPro,  iCount</td>
+        <td>PureCLIP, iCLIPro, iCount</td>
     </tr>
     <tr>
         <td>eCLIP</td>
-        <td>PureCLIP, iCLIPro,  iCount</td>
+        <td>PureCLIP, iCLIPro, iCount</td>
     </tr>
     <tr>
         <td>4sU-iCLIP</td>
-        <td>PureCLIP, iCLIPro,  iCount</td>
+        <td>PureCLIP, iCLIPro, iCount</td>
     </tr>
     <tr>
         <td>urea-iCLIP</td>
-        <td>PureCLIP, iCLIPro,  iCount</td>
+        <td>PureCLIP, iCLIPro, iCount</td>
     </tr>
     <tr>
         <td>BrdU-CLIP</td>
-        <td>CTK, PureCLIP, iCLIPro,  iCount</td>
+        <td>CTK</td>
     </tr>
     <tr>
         <td>Fr-iCLIP</td>
-        <td>PureCLIP, iCLIPro,  iCount</td>
+        <td>PureCLIP, iCLIPro, iCount</td>
     </tr>
     <tr>
         <td>FAST-iCLIP</td>
-        <td>PureCLIP, iCLIPro,  iCount</td>
+        <td>PureCLIP, iCLIPro, iCount</td>
     </tr>
     <tr>
         <td>irCLIP</td>
-        <td>PureCLIP, iCLIPro,  iCount</td>
+        <td>PureCLIP, iCLIPro, iCount</td>
     </tr>
     <tr>
         <td>seCLIP</td>
