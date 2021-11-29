@@ -1,5 +1,5 @@
 site_name: CLIPipe
-theme: mkdocs
+theme: readthedocs
 repo_url: https://github.com/ShangZhang/clipipe
 copyright: shang_zhang@foxmail.com
 
