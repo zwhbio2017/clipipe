@@ -1,6 +1,7 @@
 site_name: CLIPipe
 theme: readthedocs
 repo_url: https://github.com/ShangZhang/clipipe
+edit_url: https://github.com/ShangZhang/clipipe/edit/master
 copyright: shang_zhang@foxmail.com
 
 nav:
