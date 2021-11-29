@@ -1,6 +1,6 @@
 site_name: CLIPipe
 theme: readthedocs
-repo_url: https://github.com/ShangZhang/clipipe
+repo_url: https://github.com/lulab/CLIPipe
 edit_uri: blob/master/docs/
 copyright: shang_zhang@foxmail.com
 
