@@ -58,7 +58,7 @@
          sites of protein-RNA interactions on RNA.
 
          CLIPipe's main input are FASTQ files with iCLIP sequencing data, its main output are BED files
-         with identified and quantified cross-linked sites.
+         with identified cross-linked sites.
 
          A number of analyses are included in CLIPipe that provide insights into the properties of
          protein-RNA interaction.
