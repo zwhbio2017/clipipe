@@ -30,7 +30,7 @@ The CLIPipe workflow consists of:
     -   [Peak calling](4_usage.md#peak-calling)
     -   [Motif discovery](4_usage.md#motif-discovery)
 -   [Frequently asked questions](5_faq.md)
--   [Citation](#citation)
 -   [Copyright and License](6_copyright_and_license.md)
+-   [Tutorial](https://clipipe.readthedocs.io/)
 
 This documentation is for CLIPipe version: 1.0.3
