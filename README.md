@@ -28,7 +28,7 @@ The CLIPipe workflow consists of:
   - [Motif discovery](#motif-discovery)
 - [Copyright and License Information](#copyright-and-license-information)
 - [Citation](#citation)
-- [Tutorial](tutorial/)
+- [Tutorial](https://clipipe.readthedocs.io/)
 
 ## Requirements
 
