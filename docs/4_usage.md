@@ -248,7 +248,6 @@ perl /home/CLIPipe_user/clipipe2/clipipe_software/bin/meme/2.prepare_MEME.pl ${s
 perl /home/CLIPipe_user/clipipe2/clipipe_software/bin/meme/2.prepare_MEME.pl ${sample_id} test ${genome_fasta}
 
 # 3. run MEME on training dataset
-mkdir MEME_output
 meme ${sample_id}.training_peak.fa -o MEME_output -dna -minw 4 -maxw 10 -nmotifs 25 # the number of minw, maxw and nmotifs could change
 
 # 4. run FIMO on test dataset
