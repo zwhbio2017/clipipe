@@ -38,7 +38,7 @@ Other parameters are defined in `default\_config.yaml`. You may also change para
 
 ### Why PureCLIP run so slowly and often use up the memory?
 
-It is possibly because PureCLIP builds models for all chromosomes in the genome fasta files, regardless of whether the bam file contains alignment on the chromosome. Thus, PureCLIP would build models for many chromosomes and scaffolds that even have no reads on it, which would be a waste of time and memory. If you encounter such problems, consider specifying the "-iv" parameter when running PureCLIP in such format: `-iv chr1;chr2;chr3` (must match the chromosome name in the genome fasta file). In this way, PureCLIP would only build models on the 3 defined chromosomes, thus making it faster to process the data.
+It is possibly because PureCLIP builds models for all chromosomes in the genome fasta files, regardless of whether the bam file contains alignment on the chromosome. Thus, PureCLIP would build models for many chromosomes and scaffolds that even have no reads on it, which would be a waste of time and memory. If you encounter such problems, consider specifying the "-iv" parameter when running PureCLIP in such format: `-iv 'chr1;chr2;chr3'` (must match the chromosome name in the genome fasta file). In this way, PureCLIP would only build models on the 3 defined chromosomes, thus making it faster to process the data.
 
 ### When bugs appear?
 
